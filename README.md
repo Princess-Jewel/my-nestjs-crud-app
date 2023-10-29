@@ -65,7 +65,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## Stay in touch
 
 - Author - [Princess Jewel Jel-Edema(https://princess-jewel.vercel.app)
-- Website - [[(https://princess-jewel.vercel.app)]](https://princess-jewel.vercel.app)
+- Website - (https://princess-jewel.vercel.app)(https://princess-jewel.vercel.app)
 - Twitter - [@Princess Jewel](https://twitter.com/thatebonychic)
 
 ## License
