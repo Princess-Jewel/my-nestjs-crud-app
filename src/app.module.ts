@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { AuthModule } from './modules/auth.module';
+import { UsersModule } from './modules/users.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { DatabaseConnectionModule } from './databaseConnection/databaseConnection.module';
+import { DatabaseConnectionModule } from './modules/databaseConnection.module';
+import { Users } from './schema/users.model';
 
 @Module({
   imports: [SequelizeModule.forRoot({
@@ -12,10 +13,10 @@ import { DatabaseConnectionModule } from './databaseConnection/databaseConnectio
     username: "root",
     password:"",
     database: "signups",
-    models:[],
+    models:[Users],
 
 
-  }), DatabaseConnectionModule, AuthModule, UserModule]
+  }), DatabaseConnectionModule, AuthModule, UsersModule]
 
 
 })

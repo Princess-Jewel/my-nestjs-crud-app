@@ -8,7 +8,7 @@ export class DatabaseConnectionController {
   @Get('test-database')
   async testDatabase() {
     try {
-      // This is how i checked whether or not the database connection is successful
+      // This is how i check whether or not the database connection is successful
       const result = await this.sequelize.query('SELECT 1');
       return 'Database connection test successful!';
     } catch (error) {

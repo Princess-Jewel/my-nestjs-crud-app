@@ -1,6 +1,6 @@
 // test.module.ts
 import { Module } from '@nestjs/common';
-import { DatabaseConnectionController } from './databaseConnection.controller';
+import { DatabaseConnectionController } from '../controllers/databaseConnection.controller';
 
 
 @Module({
