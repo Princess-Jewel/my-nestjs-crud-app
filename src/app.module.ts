@@ -16,7 +16,9 @@ import { Users } from './schema/users.model';
     models:[Users],
 
 
-  }), DatabaseConnectionModule, AuthModule, UsersModule]
+  }),AuthModule, DatabaseConnectionModule, UsersModule]
+  // ERROR [ExceptionHandler] Nest can't resolve dependencies of the AuthService (?). Please make sure that the argument UsersRepository at index [0] is available in the AuthModule context.
+  // i faced this error because i added AuthModule in line 19
 
 
 })
