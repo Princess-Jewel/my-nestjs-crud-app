@@ -4,6 +4,8 @@ import { UsersModule } from './modules/users.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { DatabaseConnectionModule } from './modules/databaseConnection.module';
 import { Users } from './schema/users.model';
+import { PostsModule } from './modules/posts.module';
+import { Posts } from './schema/posts.model';
 
 
 @Module({
@@ -14,10 +16,10 @@ import { Users } from './schema/users.model';
     username: "root",
     password:"",
     database: "signups",
-    models:[Users],
+    models:[Users, Posts],
 
 
-  }),AuthModule, DatabaseConnectionModule, UsersModule]
+  }),AuthModule, DatabaseConnectionModule, UsersModule, PostsModule]
 
 
 })
