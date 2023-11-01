@@ -49,7 +49,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto.email, signInDto.password);
+  async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
+    return this.authService.signIn(signInDto.email, signInDto.password, res);
   }
 }

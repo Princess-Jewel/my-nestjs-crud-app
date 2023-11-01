@@ -5,6 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { DatabaseConnectionModule } from './modules/databaseConnection.module';
 import { Users } from './schema/users.model';
 
+
 @Module({
   imports: [SequelizeModule.forRoot({
     dialect: "mysql",
