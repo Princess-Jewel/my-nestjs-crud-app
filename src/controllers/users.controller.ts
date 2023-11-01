@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Res } from '@nestjs/common';
+import { Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { Response } from 'express';
+import { AuthGuard } from 'src/guard/auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
+  @UseGuards(AuthGuard)
   // GET /users
   @Get()
   async findAllUsers(@Res() res: Response) {
