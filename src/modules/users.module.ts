@@ -6,12 +6,7 @@ import { DatabaseConnectionModule } from './databaseConnection.module';
 import { UsersController } from '../controllers/users.controller';
 import { UsersService } from '../services/users.service';
 
-// @Module({
-//     imports: [SequelizeModule.forFeature([Users])],
-//     controllers: [UsersController],
-//     providers: [UsersService],
-//     // exports: [UsersService],
-// })
+
 
 @Module({
     imports: [DatabaseConnectionModule],
@@ -20,9 +15,9 @@ import { UsersService } from '../services/users.service';
       UsersService,
       ...usersProviders,
     ],
+    exports: [UsersService],
   })
 export class UsersModule {}
-
 
 
 

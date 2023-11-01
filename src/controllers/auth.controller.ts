@@ -1,8 +1,16 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  Res,
+} from '@nestjs/common';
 import { CreateUserDto } from '../dto/createUser.dto';
 import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
+import { SignInDto } from 'src/dto/signin.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +33,6 @@ export class AuthController {
         age: createdUser.age,
         createdAt: createdUser.createdAt,
       };
-      // Return a JSON response with a success message and the created user data
       return res.status(201).json({
         status: 'Success',
         message: 'User created successfully',
@@ -38,5 +45,11 @@ export class AuthController {
         .status(500)
         .json({ message: 'User creation failed', error: error.message });
     }
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  signIn(@Body() signInDto: SignInDto) {
+    return this.authService.signIn(signInDto.email, signInDto.password);
   }
 }

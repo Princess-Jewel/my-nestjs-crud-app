@@ -10,9 +10,15 @@ export class UsersController {
   async findAllUsers(@Res() res: Response) {
     const users = await this.usersService.findAll();
     if (users) {
-      return res.status(200).json({ message: 'Success', data: users });
+      // Create a new array of user objects without the password included
+      const formattedUsers = users.map(user => {
+        const { id, email, fname, lname, age, createdAt, updatedAt } = user;
+        return { id, email, fname, lname, age, createdAt, updatedAt };
+      });
+  
+      return res.status(200).json({ message: 'Success', data: formattedUsers });
     } else {
       return res.status(404).json({ message: 'Not found' });
     }
-  }
+  } 
 }
