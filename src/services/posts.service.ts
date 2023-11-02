@@ -20,5 +20,25 @@ export class PostsService {
     }
   }
 
+
+  // DELETE A POST
+  // async findPostById(userId: string): Promise<Posts | null> {
+  //   return await Posts.findByPk(userId);
+  // }
+
+  // async deletePost(postId: number): Promise<void> {
+  // try { 
+  //   console.log("princess is here with postId", postId);
+
+  //     // await Posts.destroy({ where: { postId } });
+  // } catch (error) {
+  //    // Handle the error and throw a meaningful exception
+  //    console.error('Error deleting post:', error);
+  //    throw new Error('Failed to delete post.');
+  // }
+  
+  // }
+
+
  
 }
