@@ -6,7 +6,6 @@ import {
   Req,
   UseGuards,
   Delete,
-  Patch,
   NotFoundException,
   UnauthorizedException,
   Inject,
@@ -110,7 +109,7 @@ export class PostsController {
         await post.destroy();
 
         // Respond with a success message
-        res.status(200).json({ message: 'Post deleted successfully' });
+        res.status(200).json({status: 'success', message: 'Post deleted successfully', deletedPost: post });
       } else {
         return res
           .status(401)
