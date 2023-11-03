@@ -11,14 +11,30 @@ import { AuthService } from '../services/auth.service';
 import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { SignInDto } from 'src/dto/signin.dto';
+import { UsersService } from 'src/services/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     try {
+      // First check if email exists in the database
+      const existingUser = await this.usersService.findOne(createUserDto.email);
+
+      if (existingUser) {
+        return res
+          .status(401)
+          .json({
+            status: 'Error',
+            message: 'User with the same email already exists.',
+          });
+      }
+
       const saltOrRounds = 10;
       const hash = await bcrypt.hash(createUserDto.password, saltOrRounds);
       // Add the hashed password to createUserDto

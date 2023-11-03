@@ -17,7 +17,8 @@ export class AuthService {
 
   async create(user: CreateUserWithoutId): Promise<Users> {
     try {
-      return await this.usersRepository.create(user);
+      return  await this.usersRepository.create(user);
+     
     } catch (error) {
       // Handle the error and throw a meaningful exception
       console.error('Error creating user:', error);
