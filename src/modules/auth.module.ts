@@ -9,9 +9,6 @@ import * as dotenv from 'dotenv';
 
 
 dotenv.config();
-// import { jwtConstants } from 'src/constants/constants';
-// import { jwtConstants } from './constants';
-
 
 @Module({
   imports: [DatabaseConnectionModule, UsersModule,   JwtModule.register({

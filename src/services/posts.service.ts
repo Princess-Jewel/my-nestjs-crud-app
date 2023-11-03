@@ -20,16 +20,5 @@ export class PostsService {
     }
   }
 
-//   async update(post: CreatePostsWithoutId): Promise<Posts> {
-//     try {
-//       console.log(post)
-// return
-//     } catch (error) {
-//       // Handle the error and throw a meaningful exception
-//       console.error('Error creating user:', error);
-//       throw new Error('Failed to create a user.');
-//     }
-//   }
-
  
 }

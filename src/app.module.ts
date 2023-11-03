@@ -6,6 +6,8 @@ import { DatabaseConnectionModule } from './modules/databaseConnection.module';
 import { Users } from './schema/users.model';
 import { PostsModule } from './modules/posts.module';
 import { Posts } from './schema/posts.model';
+import { CommentsModule } from './modules/comments.module';
+import { Comments } from './schema/comments.model';
 
 
 @Module({
@@ -16,10 +18,10 @@ import { Posts } from './schema/posts.model';
     username: "root",
     password:"",
     database: "signups",
-    models:[Users, Posts],
+    models:[Users, Posts, Comments],
 
 
-  }),AuthModule, DatabaseConnectionModule, UsersModule, PostsModule]
+  }),AuthModule, DatabaseConnectionModule, UsersModule, PostsModule, CommentsModule]
 
 
 })

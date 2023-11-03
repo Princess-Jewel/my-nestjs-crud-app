@@ -91,7 +91,7 @@ export class PostsController {
         }
         const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
 
-        const postId = req.params.postId; // Assuming the post ID is passed as a route parameter
+        const postId = req.params.postId;
         const post = await Posts.findByPk(postId);
 
         // Check if the post doesn't exist
