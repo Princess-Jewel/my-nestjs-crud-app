@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsEmail,} from 'class-validator';
 
-export class CreatePostsDto {
+export class EditPostsDto {
   @IsString()
   @IsNotEmpty()
   title: string;
@@ -19,4 +19,4 @@ export class CreatePostsDto {
 
 
 // Omit the 'id' property
-export type CreatePostsWithoutId = Omit<CreatePostsDto, 'id'>;
+export type EditPostsWithoutId = Omit<EditPostsDto, 'id'>;
