@@ -1,4 +1,5 @@
-import { Model, Column, PrimaryKey, AutoIncrement, Table } from 'sequelize-typescript';
+import { Model, Column, PrimaryKey, AutoIncrement, Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Posts } from './posts.model';
 
 
 @Table
@@ -8,8 +9,6 @@ export class Comments extends Model {
   @Column
   id: number;
 
-  @Column({ allowNull: false })
-  postId: string;
 
   @Column({ allowNull: false }) 
   comment: string;
@@ -17,5 +16,10 @@ export class Comments extends Model {
   @Column({ allowNull: false }) 
   userId: number;
 
+  @ForeignKey(() => Posts)
+  @Column
+  postId: number;
 
+  @BelongsTo(() => Posts)
+  post: Posts; // This sets up the association to the Posts model
 }

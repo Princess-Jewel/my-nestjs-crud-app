@@ -3,6 +3,8 @@ import { DatabaseConnectionModule } from './databaseConnection.module';
 import { PostsController } from 'src/controllers/posts.controller';
 import { PostsService } from 'src/services/posts.service';
 import { postsProviders } from 'src/providers/posts.providers';
+import { CommentsService } from 'src/services/comments.service';
+import { commentsProviders } from 'src/providers/comments.providers';
 
 
 
@@ -14,6 +16,8 @@ import { postsProviders } from 'src/providers/posts.providers';
   providers: [
     PostsService,
     ...postsProviders,
+    CommentsService,
+    ...commentsProviders
   ],
 })
 

@@ -11,6 +11,7 @@ import {
   Inject,
   Param,
   Put,
+  Get,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { CreatePostsDto } from 'src/dto/posts.dto';
@@ -20,6 +21,7 @@ import * as dotenv from 'dotenv';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { Posts } from 'src/schema/posts.model';
 import { EditPostsDto } from 'src/dto/editPosts.dto';
+import { Comments } from 'src/schema/comments.model';
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ export class PostsController {
     private postsService: PostsService,
     @Inject('POSTS_REPOSITORY')
     private postsRepository: typeof Posts,
+    @Inject('COMMENTS_REPOSITORY')
+    private commentsRepository: typeof Comments,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -73,6 +77,7 @@ export class PostsController {
   }
 
   // DELETE A POST
+  @UseGuards(AuthGuard)
   @Delete(':postId')
   async deletePost(@Req() req: Request, @Res() res: Response) {
     try {
@@ -123,6 +128,7 @@ export class PostsController {
   }
 
   // UPDATE A POST
+  @UseGuards(AuthGuard)
   @Put(':id')
   async editPost(
     @Param('id') id: number,
@@ -190,6 +196,42 @@ export class PostsController {
           .status(500)
           .json({ status: 'error', error: 'Internal server error' });
       }
+    }
+  }
+
+
+  // GET ALL POSTS AND COMMENTS
+  @UseGuards(AuthGuard)
+  @Get('allPostsAndComments')
+  async getPostsAndComments(): Promise<any> {
+    try {
+      const posts = await this.postsRepository.findAll({
+        include: [
+          {
+            model: this.commentsRepository,
+            attributes: ['comment'],
+          },
+        ],
+        order: [['id', 'DESC']],
+      });
+
+      if (!posts || posts.length === 0) {
+        return { error: 'No Post(s)' };
+      }
+
+      // Process the data to separate comments
+      const processedData = posts.map((post) => {
+        const comments = post.comments.map((comment) => comment.comment);
+        return {
+          title: post.title,
+          content: post.content,
+          comments,
+        };
+      });
+
+      return processedData;
+    } catch (error) {
+      throw error;
     }
   }
 }

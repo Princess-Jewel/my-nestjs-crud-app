@@ -1,4 +1,5 @@
-import { Model, Column, PrimaryKey, AutoIncrement, Table } from 'sequelize-typescript';
+import { Model, Column, PrimaryKey, AutoIncrement, Table, HasMany } from 'sequelize-typescript';
+import { Comments } from './comments.model'; 
 
 
 @Table
@@ -20,5 +21,11 @@ export class Posts extends Model {
   @Column
   userId: number;
 
+  @HasMany(() => Comments)
+  comments: Comments[]; // This sets up a one-to-many relationship with Comments model
 
 }
+
+
+
+

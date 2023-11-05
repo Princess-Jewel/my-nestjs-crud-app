@@ -93,6 +93,7 @@ export class CommentsController {
 
 
    // UPDATE A POST
+   @UseGuards(AuthGuard)
    @Delete(':commentId')
    async deleteComment(
      @Param('commentId') commentId: number,
