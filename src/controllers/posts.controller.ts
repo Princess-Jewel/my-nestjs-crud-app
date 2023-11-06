@@ -20,7 +20,6 @@ import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { Posts } from 'src/schema/posts.model';
-import { EditPostsDto } from 'src/dto/editPosts.dto';
 import { Comments } from 'src/schema/comments.model';
 
 dotenv.config();
@@ -114,7 +113,13 @@ export class PostsController {
         await post.destroy();
 
         // Respond with a success message
-        res.status(200).json({status: 'success', message: 'Post deleted successfully', deletedPost: post });
+        res
+          .status(200)
+          .json({
+            status: 'success',
+            message: 'Post deleted successfully',
+            deletedPost: post,
+          });
       } else {
         return res
           .status(401)
@@ -132,7 +137,7 @@ export class PostsController {
   @Put(':id')
   async editPost(
     @Param('id') id: number,
-    @Body() editPostDto: EditPostsDto,
+    @Body() createPostsDto: CreatePostsDto,
     @Res() res: Response,
     @Req() req: Request,
   ) {
@@ -169,7 +174,7 @@ export class PostsController {
         }
 
         // Update the post with the new title and content
-        const updatedPost = await post.update(editPostDto);
+        const updatedPost = await post.update(createPostsDto);
 
         // Respond with a success message
         return res.status(200).json({
@@ -198,7 +203,6 @@ export class PostsController {
       }
     }
   }
-
 
   // GET ALL POSTS AND COMMENTS
   @UseGuards(AuthGuard)

@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsEmail, MinLength, IsInt, Min, Max } from 'class-validator';
 
-export class CreateUserDto {
+export class UpdatePasswordDto {
   @IsString()
   @IsNotEmpty()
   fname: string;
@@ -23,8 +23,13 @@ export class CreateUserDto {
   @MinLength(6)
   password: string;
 
+  
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(6)
+  newPassword: string;
 }
 
 
 // Omit the 'id' property
-export type CreateUserWithoutId = Omit<CreateUserDto, 'id'>;
+// export type CreateUserWithoutId = Omit<UpdatePasswordDto, 'id'>;

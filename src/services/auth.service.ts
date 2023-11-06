@@ -31,7 +31,7 @@ export class AuthService {
     // First check if email exists in the database
     const user = await this.usersService.findOne(email);
     if (user && (await bcrypt.compare(password, user.password))) {
-      // NOTE TO SELF:  we choose a property name of sub to hold our userId value to be consistent with JWT standards.y
+      // NOTE TO SELF:  we choose a property name of sub to hold our userId value to be consistent with JWT standards
       const payload = { sub: user.id, email: user.email };
       // Passwords match, return the payload in the jwt
 
