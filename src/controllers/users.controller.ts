@@ -10,6 +10,10 @@ import {
   NotFoundException,
   UnauthorizedException,
   Inject,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { Response, Request } from 'express';
@@ -19,13 +23,22 @@ import * as jwt from 'jsonwebtoken';
 import { Users } from 'src/schema/users.model';
 import * as bcrypt from 'bcrypt';
 import { UpdatePasswordDto } from 'src/dto/updatePassword.dto';
+import { Sequelize } from 'sequelize-typescript';
+
+import {
+  AnyFilesInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express/multer';
+import { cloudinary } from '../helper/cloudinary.config';
+import { Readable } from 'stream';
+const image = 'src/images/4912156.jpg';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
     @Inject('USERS_REPOSITORY')
-    private usersRepository: typeof Users,
+    private usersRepository: typeof Users, // private sequelize: Sequelize
   ) {}
 
   @UseGuards(AuthGuard)
@@ -139,7 +152,9 @@ export class UsersController {
   ) {
     try {
       // first check if user exists in the database
-      const userExists = await this.usersService.findOne(updatePasswordDto.email);
+      const userExists = await this.usersService.findOne(
+        updatePasswordDto.email,
+      );
 
       if (!userExists) {
         return res.status(401).json({
@@ -152,17 +167,17 @@ export class UsersController {
         userExists &&
         (await bcrypt.compare(updatePasswordDto.password, userExists.password))
       ) {
-    
-
-
         const saltOrRounds = 10;
-        const hash = await bcrypt.hash(updatePasswordDto.newPassword, saltOrRounds);
+        const hash = await bcrypt.hash(
+          updatePasswordDto.newPassword,
+          saltOrRounds,
+        );
 
-        // Add the hashed password to updatePasswordDto  
+        // Add the hashed password to updatePasswordDto
         updatePasswordDto.password = hash;
 
         // Update the user with the new fname
-         await userExists.update(updatePasswordDto);
+        await userExists.update(updatePasswordDto);
 
         // // Respond with a success message
         return res.status(200).json({
@@ -188,6 +203,77 @@ export class UsersController {
       }
     }
   }
+
+  // UPLOAD PROFILE PICTURE
+  @UseGuards(AuthGuard)
+  @UseInterceptors(AnyFilesInterceptor())
+  @Post('upload/images')
+  async uploadImage(
+    @UploadedFiles() file: Array<Express.Multer.File>,
+    @Body() createUserDto: CreateUserDto,
+    @Res() res: Response,
+    @Req()
+    req: Request,
+  ) {
+    try {
+      const token = req.headers.authorization;
+
+      if (token && token.startsWith('Bearer ')) {
+        const authToken = token.slice(7);
+
+        // Verify and decode the JWT
+        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+        if (typeof decoded === 'object' && decoded.hasOwnProperty('email')) {
+          const email = decoded.email;
+          // Find the user by user email
+          const user = await this.usersRepository.findOne({ where: { email } });
+
+          // // Check if the user doesn't exist
+          if (!user) {
+            throw new NotFoundException('User Not Found');
+          }
+
+          // Check if the userEmail belongs to the current user
+          if (user.email !== email) {
+            throw new UnauthorizedException('Unauthorized');
+          }
+
+          const result: any = await uploadStream(file[0].buffer);
+          // Add the uploaded avatar url to the createUserDto
+          createUserDto.avatar = result.url;
+
+          // Update the user avatar
+          const updatedAvatar = await user.update(createUserDto);
+          // I created a new object because i dont want to send the password to the frontend
+          const updatedUserAvatar = {
+            id: updatedAvatar.id,
+            fname: updatedAvatar.fname,
+            lname: updatedAvatar.lname,
+            email: updatedAvatar.email,
+            age: updatedAvatar.age,
+            avatar: updatedAvatar.avatar,
+            createdAt: updatedAvatar.createdAt,
+            updatedAt: updatedAvatar.updatedAt,
+          };
+          // Respond with a success message
+          return res.status(200).json({
+            status: 'Success',
+            message: 'Profile Picture updated successfully',
+            data: updatedUserAvatar,
+          });
+        } else {
+          res
+            .status(500)
+            .json({
+              status: 'error',
+              error: 'Invalid or missing email in decoded JWT payload',
+            });
+        }
+      }
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error });
+    }
+  }
 }
 
 // Separate error handling functions
@@ -196,5 +282,21 @@ function handleJwtVerificationError(res: Response, error: any) {
     status: 'Error',
     message: 'JWT verification failed',
     error: error.message,
+  });
+}
+
+async function uploadStream(buffer) {
+  return new Promise((res, rej) => {
+    const theTransformStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'auto',
+      },
+      (err, result) => {
+        if (err) return rej(err);
+        res(result);
+      },
+    );
+    let str = Readable.from(buffer);
+    str.pipe(theTransformStream);
   });
 }
