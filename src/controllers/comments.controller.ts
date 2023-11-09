@@ -20,6 +20,7 @@ import { Posts } from 'src/schema/posts.model';
 import { CreateCommentsDto } from 'src/dto/comments.dto';
 import { CommentsService } from 'src/services/comments.service';
 import { Comments } from 'src/schema/comments.model';
+import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 
 dotenv.config();
 
@@ -160,11 +161,3 @@ export class CommentsController {
    }
 }
 
-// Separate error handling functions
-function handleJwtVerificationError(res: Response, error: any) {
-  return res.status(401).json({
-    status: 'Error',
-    message: 'JWT verification failed',
-    error: error.message,
-  });
-}

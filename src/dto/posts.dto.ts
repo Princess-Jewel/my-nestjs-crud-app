@@ -15,6 +15,9 @@ export class CreatePostsDto {
 
   @IsNotEmpty()
   userId: number;
+
+  @IsString()
+  images: string;
 }
 
 

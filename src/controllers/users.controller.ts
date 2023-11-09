@@ -23,23 +23,21 @@ import * as jwt from 'jsonwebtoken';
 import { Users } from 'src/schema/users.model';
 import * as bcrypt from 'bcrypt';
 import { UpdatePasswordDto } from 'src/dto/updatePassword.dto';
-import { Sequelize } from 'sequelize-typescript';
 
 import {
   AnyFilesInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express/multer';
-import { cloudinary } from '../helper/cloudinary.config';
-import { Readable } from 'stream';
 import { UploadAvatarDto } from 'src/dto/uploadAvatar.dto';
-const image = 'src/images/4912156.jpg';
+import { uploadStream } from 'src/helper/uploadStream';
+import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
     @Inject('USERS_REPOSITORY')
-    private usersRepository: typeof Users, // private sequelize: Sequelize
+    private usersRepository: typeof Users,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -277,27 +275,6 @@ export class UsersController {
   }
 }
 
-// Separate error handling functions
-function handleJwtVerificationError(res: Response, error: any) {
-  return res.status(401).json({
-    status: 'Error',
-    message: 'JWT verification failed',
-    error: error.message,
-  });
-}
 
-async function uploadStream(buffer) {
-  return new Promise((res, rej) => {
-    const theTransformStream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: 'auto',
-      },
-      (err, result) => {
-        if (err) return rej(err);
-        res(result);
-      },
-    );
-    let str = Readable.from(buffer);
-    str.pipe(theTransformStream);
-  });
-}
+
+

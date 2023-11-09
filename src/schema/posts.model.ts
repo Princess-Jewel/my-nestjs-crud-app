@@ -21,6 +21,9 @@ export class Posts extends Model {
   @Column
   userId: number;
 
+  @Column
+  images: string;
+
   @HasMany(() => Comments)
   comments: Comments[]; // This sets up a one-to-many relationship with Comments model
 

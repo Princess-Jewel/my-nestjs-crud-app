@@ -21,6 +21,8 @@ import * as dotenv from 'dotenv';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { Posts } from 'src/schema/posts.model';
 import { Comments } from 'src/schema/comments.model';
+import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+import { handlePostCreationError } from 'src/errorHandlers/handlePostCreationError';
 
 dotenv.config();
 
@@ -240,19 +242,4 @@ export class PostsController {
   }
 }
 
-// Separate error handling functions
-function handleJwtVerificationError(res: Response, error: any) {
-  return res.status(401).json({
-    status: 'Error',
-    message: 'JWT verification failed',
-    error: error.message,
-  });
-}
 
-function handlePostCreationError(res: Response, error: any) {
-  return res.status(500).json({
-    status: 'Error',
-    message: 'Post creation failed',
-    error: error.message,
-  });
-}
