@@ -20,7 +20,7 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
-  @Post('signup')
+  @Post('register')
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     try {
       // First check if email exists in the database
@@ -47,7 +47,9 @@ export class AuthController {
         lname: createdUser.lname,
         email: createdUser.email,
         age: createdUser.age,
+        avatar: createdUser.avatar,
         createdAt: createdUser.createdAt,
+        updatedAt: createdUser.updatedAt,
       };
       return res.status(201).json({
         status: 'Success',

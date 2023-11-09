@@ -43,7 +43,9 @@ export class AuthService {
         lname: user.lname,
         email: user.email,
         age: user.age,
+        avatar: user.avatar,
         createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       // Send the response

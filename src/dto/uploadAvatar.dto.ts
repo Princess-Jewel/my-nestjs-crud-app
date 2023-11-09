@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsEmail, MinLength, IsInt, Min, Max } from 'class-validator';
 
-export class CreateUserDto {
+export class UploadAvatarDto {
   @IsString()
   @IsNotEmpty()
   fname: string;
@@ -22,9 +22,11 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
-
+  
+  @IsString()
+  avatar: string;
 }
 
 
 // Omit the 'id' property
-export type CreateUserWithoutId = Omit<CreateUserDto, 'id'>;
+export type UploadAvatarWithoutId = Omit<UploadAvatarDto, 'id'>;

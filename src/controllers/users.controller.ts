@@ -31,6 +31,7 @@ import {
 } from '@nestjs/platform-express/multer';
 import { cloudinary } from '../helper/cloudinary.config';
 import { Readable } from 'stream';
+import { UploadAvatarDto } from 'src/dto/uploadAvatar.dto';
 const image = 'src/images/4912156.jpg';
 
 @Controller('users')
@@ -210,7 +211,7 @@ export class UsersController {
   @Post('upload/images')
   async uploadImage(
     @UploadedFiles() file: Array<Express.Multer.File>,
-    @Body() createUserDto: CreateUserDto,
+    @Body() uploadAvatarDto: UploadAvatarDto,
     @Res() res: Response,
     @Req()
     req: Request,
@@ -240,10 +241,10 @@ export class UsersController {
 
           const result: any = await uploadStream(file[0].buffer);
           // Add the uploaded avatar url to the createUserDto
-          createUserDto.avatar = result.url;
+          uploadAvatarDto.avatar = result.url;
 
           // Update the user avatar
-          const updatedAvatar = await user.update(createUserDto);
+          const updatedAvatar = await user.update(uploadAvatarDto);
           // I created a new object because i dont want to send the password to the frontend
           const updatedUserAvatar = {
             id: updatedAvatar.id,
