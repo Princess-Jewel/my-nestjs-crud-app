@@ -8,6 +8,7 @@ import { PostsModule } from './modules/posts.module';
 import { Posts } from './schema/posts.model';
 import { CommentsModule } from './modules/comments.module';
 import { Comments } from './schema/comments.model';
+import { Images } from './schema/postsWithImages.model';
 
 
 @Module({
@@ -18,7 +19,7 @@ import { Comments } from './schema/comments.model';
     username: "root",
     password:"",
     database: "signups",
-    models:[Users, Posts, Comments],
+    models:[Users, Posts, Comments, Images],
 
 
   }),AuthModule, DatabaseConnectionModule, UsersModule, PostsModule, CommentsModule]

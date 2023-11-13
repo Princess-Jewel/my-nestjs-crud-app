@@ -5,6 +5,8 @@ import { PostsService } from 'src/services/posts.service';
 import { postsProviders } from 'src/providers/posts.providers';
 import { CommentsService } from 'src/services/comments.service';
 import { commentsProviders } from 'src/providers/comments.providers';
+import { PostsWithImagesService } from 'src/services/postsWithImages.service';
+import { postsWithImagesProviders } from 'src/providers/postsWithImages.providers';
 
 
 
@@ -17,7 +19,9 @@ import { commentsProviders } from 'src/providers/comments.providers';
     PostsService,
     ...postsProviders,
     CommentsService,
-    ...commentsProviders
+    PostsWithImagesService,
+    ...commentsProviders,
+    ...postsWithImagesProviders
   ],
 })
 

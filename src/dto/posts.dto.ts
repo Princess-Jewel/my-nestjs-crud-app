@@ -17,7 +17,7 @@ export class CreatePostsDto {
   userId: number;
 
   @IsString()
-  images: string;
+  image: string;
 }
 
 

@@ -12,6 +12,8 @@ import {
   Param,
   Put,
   Get,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { CreatePostsDto } from 'src/dto/posts.dto';
@@ -23,6 +25,13 @@ import { Posts } from 'src/schema/posts.model';
 import { Comments } from 'src/schema/comments.model';
 import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 import { handlePostCreationError } from 'src/errorHandlers/handlePostCreationError';
+import {
+  AnyFilesInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express/multer';
+import { uploadStream } from 'src/helper/uploadStream';
+import { PostsWithImagesDto } from 'src/dto/postsWithImages.dto';
+import { PostsWithImagesService } from 'src/services/postsWithImages.service';
 
 dotenv.config();
 
@@ -30,18 +39,23 @@ dotenv.config();
 export class PostsController {
   constructor(
     private postsService: PostsService,
+    private postsWithImagesService: PostsWithImagesService,
     @Inject('POSTS_REPOSITORY')
     private postsRepository: typeof Posts,
     @Inject('COMMENTS_REPOSITORY')
     private commentsRepository: typeof Comments,
   ) {}
 
+  // create posts with or without image(s)
   @UseGuards(AuthGuard)
   @Post('create')
+  @UseInterceptors(AnyFilesInterceptor())
   async createPost(
-    @Body() createPostsDto: CreatePostsDto,
+    @Body()  postsWithImagesDto: PostsWithImagesDto,
+    // postsWithImagesDto: PostsWithImagesDto,
     @Res() res: Response,
     @Req() req: Request,
+    @UploadedFiles() file: Array<Express.Multer.File>,
   ) {
     try {
       // Extract the Bearer token from the Authorization header
@@ -60,18 +74,61 @@ export class PostsController {
           return handleJwtVerificationError(res, decoded);
         }
 
-        const email = decoded.email;
+        // const email = decoded.email;
         const userId = parseInt(decoded.sub, 10);
 
-        createPostsDto.email = email;
-        createPostsDto.userId = userId;
+        // createPostsDto.email = email;
+        postsWithImagesDto.userId = userId;
+
+        
+        // find post by postId passed with the payload
+        const post = await Posts.findByPk(postsWithImagesDto.postId);
+
+        // Check if the post doesn't exist
+        if (!post) {
+          return res.status(404).json({ error: 'Post Not Found' });
+        }
+
+        // Check if the post belongs to the current user
+        if (post.userId !== userId) {
+          return res
+            .status(401)
+            .json({ status: 'error', error: 'Unauthorized' });
+        }
+
+
       }
-      const newPost = await this.postsService.create(createPostsDto);
+      // UPLOAD MULTIPLE IMAGES CONCURRENTLY
+      const uploadPromises = file.map((fileItem) =>
+        uploadStream(fileItem.buffer),
+      );
+      // THESE RETURNS THE ARRAY OF THE OBJECTS OF UPLOADED IMAGES
+      const results = await Promise.all(uploadPromises);
+
+      // I AM MAPPING THROUGH TO EXTRACT THE URLS OF EACH IMAGE UPLOADED
+      const imageUrls = (results as { url: string }[]).map(
+        (image) => image.url,
+      );
+
+      console.log(imageUrls);
+      // console.log(createPostsDto)
+     
+      
+      postsWithImagesDto.imageUrl = imageUrls;
+
+      // console.log("createPostsDto", createPostsDto)
+      console.log("postsWithImagesDto", postsWithImagesDto)
+      // post a image url associated with the post
+        const newPostWithImage = await this.postsWithImagesService.create(postsWithImagesDto);
+
+        //  const newPost = await this.postsService.create(createPostsDto);
       return res.status(201).json({
         status: 'Success',
         message: 'Post created successfully',
-        post: newPost,
+        post: newPostWithImage,
       });
+
+        
     } catch (error) {
       return handlePostCreationError(res, error);
     }
@@ -115,13 +172,11 @@ export class PostsController {
         await post.destroy();
 
         // Respond with a success message
-        res
-          .status(200)
-          .json({
-            status: 'success',
-            message: 'Post deleted successfully',
-            deletedPost: post,
-          });
+        res.status(200).json({
+          status: 'success',
+          message: 'Post deleted successfully',
+          deletedPost: post,
+        });
       } else {
         return res
           .status(401)
@@ -241,5 +296,3 @@ export class PostsController {
     }
   }
 }
-
-

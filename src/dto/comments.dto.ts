@@ -9,7 +9,7 @@ export class CreateCommentsDto {
     @IsNotEmpty()
     postId: number;
   
-    @IsEmail()
+    
     @IsNotEmpty()
     comment: string;
   
