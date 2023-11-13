@@ -5,11 +5,9 @@ export class CreateCommentsDto {
     @IsNotEmpty()
     title: string;
   
-  
     @IsNotEmpty()
     postId: number;
-  
-    
+   
     @IsNotEmpty()
     comment: string;
   

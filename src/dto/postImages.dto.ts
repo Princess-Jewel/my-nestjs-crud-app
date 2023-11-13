@@ -1,15 +1,15 @@
 import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
 
-export class PostsWithImagesDto {
+export class PostImagesDto {
   @IsNotEmpty()
   postId: number;
 
   @IsNotEmpty()
-  imageUrl: string[];
+  imageUrl: string;
 
   @IsNotEmpty()
   userId: number;
 }
 
 // Omit the 'id' property
-export type PostsWithImagesDtoWithoutId = Omit<PostsWithImagesDto, 'id'>;
+export type PostImagesDtoWithoutId = Omit<PostImagesDto, 'id'>;

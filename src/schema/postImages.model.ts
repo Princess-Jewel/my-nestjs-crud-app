@@ -10,8 +10,8 @@ export class Images extends Model {
   id: number;
 
 //  type: 'JSON' is used to represent an array of strings.
-  @Column({ allowNull: false, type: 'JSON' }) 
-  imageUrl: string[];
+  @Column({ allowNull: false}) 
+  imageUrl: string;
 
   @Column({ allowNull: false }) 
   userId: number;
