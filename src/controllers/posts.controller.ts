@@ -25,9 +25,7 @@ import { Posts } from 'src/schema/posts.model';
 import { Comments } from 'src/schema/comments.model';
 import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 import { handlePostCreationError } from 'src/errorHandlers/handlePostCreationError';
-import {
-  AnyFilesInterceptor,
-} from '@nestjs/platform-express/multer';
+import { AnyFilesInterceptor } from '@nestjs/platform-express/multer';
 import { uploadStream } from 'src/helper/uploadStream';
 import { PostImagesDto } from 'src/dto/postImages.dto';
 import { PostImagesService } from 'src/services/postImages.service';
@@ -101,12 +99,11 @@ export class PostsController {
       const imageUrls = (
         results as unknown as {
           [x: string]: any;
-          url: any;
+          url: string;
         }
       ).map((image) => image.url);
 
-
-      // i want to upload each image individually instead of as an array
+      // i want to upload each image individually instead of an array of objects
       for (const imageUrl of imageUrls) {
         // Create a new DTO for each iteration
         const dtoForIteration: PostImagesDto = {
@@ -122,10 +119,8 @@ export class PostsController {
       return res.status(201).json({
         status: 'Success',
         message: 'Image(s) uploaded successfully',
-     
       });
     } catch (error) {
-      console.log(error);
       return handlePostCreationError(res, error);
     }
   }
