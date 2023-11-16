@@ -19,18 +19,19 @@ import { UsersService } from '../services/users.service';
 import { Response, Request } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { CreateUserDto } from 'src/dto/createUser.dto';
-import * as jwt from 'jsonwebtoken';
+// import * as jwt from 'jsonwebtoken';
 import { Users } from 'src/schema/users.model';
 import * as bcrypt from 'bcrypt';
 import { UpdatePasswordDto } from 'src/dto/updatePassword.dto';
 
 import {
   AnyFilesInterceptor,
-  FileInterceptor,
+  // FileInterceptor,
 } from '@nestjs/platform-express/multer';
 import { UploadAvatarDto } from 'src/dto/uploadAvatar.dto';
 import { uploadStream } from 'src/helper/uploadStream';
-import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+// import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+import { getUserDataFromToken } from 'src/helper/getUserDataFromToken';
 
 @Controller('users')
 export class UsersController {
@@ -68,22 +69,11 @@ export class UsersController {
     req: Request,
   ) {
     try {
-      // Extract the Bearer token from the Authorization header
-      const token = req.headers.authorization;
 
-      // Check if the token exists and starts with 'Bearer '
-      if (token && token.startsWith('Bearer ')) {
-        // Remove 'Bearer ' to get just the token
-        const authToken = token.slice(7);
-
-        // Verify and decode the JWT
-        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-
-        // Handle JWT verification errors
-        if (typeof decoded === 'string') {
-          return handleJwtVerificationError(res, decoded);
-        }
-        const id = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
+      const userData = getUserDataFromToken(req, res);
+      if (userData !== null) {
+        // The token is valid, and you have the userData containing userId and email
+        const { userId: id, email } = userData;
 
         // Find the user by userId
         const user = await this.usersRepository.findOne({ where: { id } });
@@ -215,15 +205,11 @@ export class UsersController {
     req: Request,
   ) {
     try {
-      const token = req.headers.authorization;
 
-      if (token && token.startsWith('Bearer ')) {
-        const authToken = token.slice(7);
-
-        // Verify and decode the JWT
-        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-        if (typeof decoded === 'object' && decoded.hasOwnProperty('email')) {
-          const email = decoded.email;
+      const userData = getUserDataFromToken(req, res);
+      if (userData !== null) {
+        // The token is valid, and you have the userData containing userId and email
+        const { userId, email } = userData;
           // Find the user by user email
           const user = await this.usersRepository.findOne({ where: { email } });
 
@@ -268,7 +254,7 @@ export class UsersController {
               error: 'Invalid or missing email in decoded JWT payload',
             });
         }
-      }
+      
     } catch (error) {
       res.status(500).json({ status: 'error', error: error });
     }

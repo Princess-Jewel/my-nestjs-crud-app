@@ -18,17 +18,18 @@ import {
 import { Response, Request } from 'express';
 import { CreatePostsDto } from 'src/dto/posts.dto';
 import { PostsService } from 'src/services/posts.service';
-import * as jwt from 'jsonwebtoken';
+// import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { Posts } from 'src/schema/posts.model';
 import { Comments } from 'src/schema/comments.model';
-import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+// import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 import { handlePostCreationError } from 'src/errorHandlers/handlePostCreationError';
 import { AnyFilesInterceptor } from '@nestjs/platform-express/multer';
 import { uploadStream } from 'src/helper/uploadStream';
 import { PostImagesDto } from 'src/dto/postImages.dto';
 import { PostImagesService } from 'src/services/postImages.service';
+import { getUserDataFromToken } from 'src/helper/getUserDataFromToken';
 
 dotenv.config();
 
@@ -54,22 +55,13 @@ export class PostsController {
     @UploadedFiles() file: Array<Express.Multer.File>,
   ) {
     try {
-      // Extract the Bearer token from the Authorization header
-      const token = req.headers.authorization;
-
-      // Check if the token exists and starts with 'Bearer '
-      if (token && token.startsWith('Bearer ')) {
-        // Remove 'Bearer ' to get just the token
-        const authToken = token.slice(7);
-
-        // Verify and decode the JWT
-        const { sub: userId } = jwt.verify(
-          authToken,
-          process.env.JWT_SECRET,
-        ) as { sub: string };
-
+     
+      const userData = getUserDataFromToken(req, res);
+      if (userData !== null) {
+        // The token is valid, and you have the userData containing userId and email
+        const { userId, email } = userData;
         // Update userId in the DTO
-        postImagesDto.userId = parseInt(userId, 10);
+        postImagesDto.userId = userId
 
         // Find post by postId passed with the payload
         const post = await Posts.findByPk(postImagesDto.postId);
@@ -130,19 +122,10 @@ export class PostsController {
   @Delete(':postId')
   async deletePost(@Req() req: Request, @Res() res: Response) {
     try {
-      const token = req.headers.authorization;
-
-      if (token && token.startsWith('Bearer ')) {
-        const authToken = token.slice(7);
-
-        // Verify and decode the JWT
-        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-
-        // Handle JWT verification errors
-        if (typeof decoded === 'string') {
-          return handleJwtVerificationError(res, decoded);
-        }
-        const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
+      const userData = getUserDataFromToken(req, res);
+      if (userData !== null) {
+        // The token is valid, and you have the userData containing userId and email
+        const { userId, email } = userData;
 
         const postId = req.params.postId;
         const post = await Posts.findByPk(postId);
@@ -190,19 +173,11 @@ export class PostsController {
     @Req() req: Request,
   ) {
     try {
-      const token = req.headers.authorization;
+      const userData = getUserDataFromToken(req, res);
 
-      if (token && token.startsWith('Bearer ')) {
-        const authToken = token.slice(7);
-
-        // Verify and decode the JWT
-        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-
-        // Handle JWT verification errors
-        if (typeof decoded === 'string') {
-          return handleJwtVerificationError(res, decoded);
-        }
-        const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
+      if (userData !== null) {
+        // The token is valid, and you have the userData containing userId and email
+        const { userId, email } = userData;
 
         const id = req.params.id; // Assuming the post ID is passed as a route parameter
 
@@ -236,7 +211,7 @@ export class PostsController {
           .json({ status: 'Error', message: 'Unauthorized to update post' });
       }
     } catch (error) {
-      // Handle different exception types and provide appropriate responses
+
       if (
         error instanceof NotFoundException ||
         error instanceof UnauthorizedException
