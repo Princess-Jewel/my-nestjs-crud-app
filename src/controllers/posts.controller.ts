@@ -18,18 +18,17 @@ import {
 import { Response, Request } from 'express';
 import { CreatePostsDto } from 'src/dto/posts.dto';
 import { PostsService } from 'src/services/posts.service';
-// import * as jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { Posts } from 'src/schema/posts.model';
 import { Comments } from 'src/schema/comments.model';
-// import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 import { handlePostCreationError } from 'src/errorHandlers/handlePostCreationError';
 import { AnyFilesInterceptor } from '@nestjs/platform-express/multer';
 import { uploadStream } from 'src/helper/uploadStream';
 import { PostImagesDto } from 'src/dto/postImages.dto';
 import { PostImagesService } from 'src/services/postImages.service';
-import { getUserDataFromToken } from 'src/helper/getUserDataFromToken';
 
 dotenv.config();
 
@@ -44,24 +43,33 @@ export class PostsController {
     private commentsRepository: typeof Comments,
   ) {}
 
-  // upload image(s)
+  // upload image(s) with post
   @UseGuards(AuthGuard)
-  @Post('create')
+  @Post('create/images')
   @UseInterceptors(AnyFilesInterceptor())
-  async createPost(
+  async createPostAndUploadImage(
     @Body() postImagesDto: PostImagesDto,
     @Res() res: Response,
     @Req() req: Request,
     @UploadedFiles() file: Array<Express.Multer.File>,
   ) {
     try {
-     
-      const userData = getUserDataFromToken(req, res);
-      if (userData !== null) {
-        // The token is valid, and you have the userData containing userId and email
-        const { userId, email } = userData;
+      // Extract the Bearer token from the Authorization header
+      const token = req.headers.authorization;
+
+      // Check if the token exists and starts with 'Bearer '
+      if (token && token.startsWith('Bearer ')) {
+        // Remove 'Bearer ' to get just the token
+        const authToken = token.slice(7);
+
+        // Verify and decode the JWT
+        const { sub: userId } = jwt.verify(
+          authToken,
+          process.env.JWT_SECRET,
+        ) as { sub: string };
+
         // Update userId in the DTO
-        postImagesDto.userId = userId
+        postImagesDto.userId = parseInt(userId, 10);
 
         // Find post by postId passed with the payload
         const post = await Posts.findByPk(postImagesDto.postId);
@@ -117,15 +125,71 @@ export class PostsController {
     }
   }
 
+
+  // CREATE ONLY POST
+  @UseGuards(AuthGuard)
+  @Post('create/posts')
+  async createPost(
+    @Body() createPostsDto: CreatePostsDto,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    try {
+      // Extract the Bearer token from the Authorization header
+      const token = req.headers.authorization;
+
+      // Check if the token exists and starts with 'Bearer '
+      if (token && token.startsWith('Bearer ')) {
+        // Remove 'Bearer ' to get just the token
+        const authToken = token.slice(7);
+
+        // Verify and decode the JWT
+        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+        // console.log("decoded", decoded)
+
+        // Handle JWT verification errors
+        if (typeof decoded === 'string') {
+          return handleJwtVerificationError(res, decoded);
+        }
+
+        const email = decoded.email;
+        const userId = parseInt(decoded.sub, 10);
+
+        createPostsDto.email = email;
+        createPostsDto.userId = userId;
+      }
+      const newPost = await this.postsService.create(createPostsDto);
+      return res.status(201).json({
+        status: 'Success',
+        message: 'Post created successfully',
+        post: newPost,
+      });
+    } catch (error) {
+      return handlePostCreationError(res, error);
+    }
+  }
+
+
+
+
   // DELETE A POST
   @UseGuards(AuthGuard)
   @Delete(':postId')
   async deletePost(@Req() req: Request, @Res() res: Response) {
     try {
-      const userData = getUserDataFromToken(req, res);
-      if (userData !== null) {
-        // The token is valid, and you have the userData containing userId and email
-        const { userId, email } = userData;
+      const token = req.headers.authorization;
+
+      if (token && token.startsWith('Bearer ')) {
+        const authToken = token.slice(7);
+
+        // Verify and decode the JWT
+        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+
+        // Handle JWT verification errors
+        if (typeof decoded === 'string') {
+          return handleJwtVerificationError(res, decoded);
+        }
+        const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
 
         const postId = req.params.postId;
         const post = await Posts.findByPk(postId);
@@ -173,11 +237,19 @@ export class PostsController {
     @Req() req: Request,
   ) {
     try {
-      const userData = getUserDataFromToken(req, res);
+      const token = req.headers.authorization;
 
-      if (userData !== null) {
-        // The token is valid, and you have the userData containing userId and email
-        const { userId, email } = userData;
+      if (token && token.startsWith('Bearer ')) {
+        const authToken = token.slice(7);
+
+        // Verify and decode the JWT
+        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+
+        // Handle JWT verification errors
+        if (typeof decoded === 'string') {
+          return handleJwtVerificationError(res, decoded);
+        }
+        const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
 
         const id = req.params.id; // Assuming the post ID is passed as a route parameter
 
@@ -211,7 +283,7 @@ export class PostsController {
           .json({ status: 'Error', message: 'Unauthorized to update post' });
       }
     } catch (error) {
-
+      // Handle different exception types and provide appropriate responses
       if (
         error instanceof NotFoundException ||
         error instanceof UnauthorizedException
@@ -261,4 +333,32 @@ export class PostsController {
       throw error;
     }
   }
+
+
+
+  // GET A SINGLE POST
+  @UseGuards(AuthGuard)
+@Get(':id')
+async getPostById(@Param('id') id: string, @Res() res: Response) {
+  try {
+    const postId = parseInt(id, 10);
+
+    // Fetch the post details by ID
+    const post = await this.postsService.getPostById(postId);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post Not Found' });
+    }
+
+    // Increment the view count for the fetched post
+    await this.postsService.incrementViews(postId);
+
+    // Return the post details to the user
+    return res.status(200).json({ post });
+  } catch (error) {
+    console.error('Error fetching post:', error.message);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 }

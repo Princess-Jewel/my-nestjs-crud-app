@@ -21,7 +21,6 @@ import { CreateCommentsDto } from 'src/dto/comments.dto';
 import { CommentsService } from 'src/services/comments.service';
 import { Comments } from 'src/schema/comments.model';
 import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
-import { getUserDataFromToken } from 'src/helper/getUserDataFromToken';
 
 dotenv.config();
 
@@ -43,11 +42,19 @@ export class CommentsController {
     @Res() res: Response,
   ) {
     try {
-     
-      const userData = getUserDataFromToken(req, res);
-      if (userData !== null) {
-        // The token is valid, and you have the userData containing userId and email
-        const { userId, email } = userData;
+      const token = req.headers.authorization;
+
+      if (token && token.startsWith('Bearer ')) {
+        const authToken = token.slice(7);
+
+        // Verify and decode the JWT
+        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+
+        // Handle JWT verification errors
+        if (typeof decoded === 'string') {
+          return handleJwtVerificationError(res, decoded);
+        }
+        const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
 
         // find post by postId passed with the payload
         const post = await Posts.findByPk(createCommentsDto.postId);
@@ -95,10 +102,19 @@ export class CommentsController {
      @Req() req: Request,
    ) {
      try {
-      const userData = getUserDataFromToken(req, res);
-      if (userData !== null) {
-        // The token is valid, and you have the userData containing userId and email
-        const { userId, email } = userData;
+       const token = req.headers.authorization;
+ 
+       if (token && token.startsWith('Bearer ')) {
+         const authToken = token.slice(7);
+ 
+         // Verify and decode the JWT
+         const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+ 
+         // Handle JWT verification errors
+         if (typeof decoded === 'string') {
+           return handleJwtVerificationError(res, decoded);
+         }
+         const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
  
          const id = req.params.commentId; // Assuming the post ID is passed as a route parameter
  
@@ -144,4 +160,3 @@ export class CommentsController {
      }
    }
 }
-

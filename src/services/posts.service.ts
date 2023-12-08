@@ -20,5 +20,32 @@ export class PostsService {
     }
   }
 
- 
+
+  // async getPostById(id: number): Promise<Posts | null> {
+  //   return await this.postsRepository.findByPk(id);
+  // }
+
+  async getPostById(postId: number): Promise<Posts | null> {
+    const post = await Posts.findByPk(postId);
+    return post || null;
+  }
+  
+
+
+  // For Post Views
+  // async incrementViews(postId: number): Promise<void> {
+  //   const post = await this.postsRepository.findByPk(postId);
+  //   if (post) {
+  //     post.views = (post.views || 0) + 1;
+  //     await post.save();
+  //   }
+  // }
+
+  async incrementViews(postId: number): Promise<void> {
+    const post = await Posts.findByPk(postId);
+    if (post) {
+      post.views++;
+      await post.save();
+    }
+  }
 }
