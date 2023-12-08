@@ -125,7 +125,6 @@ export class PostsController {
     }
   }
 
-
   // CREATE ONLY POST
   @UseGuards(AuthGuard)
   @Post('create/posts')
@@ -168,9 +167,6 @@ export class PostsController {
       return handlePostCreationError(res, error);
     }
   }
-
-
-
 
   // DELETE A POST
   @UseGuards(AuthGuard)
@@ -334,31 +330,50 @@ export class PostsController {
     }
   }
 
-
-
   // GET A SINGLE POST
   @UseGuards(AuthGuard)
-@Get(':id')
-async getPostById(@Param('id') id: string, @Res() res: Response) {
-  try {
-    const postId = parseInt(id, 10);
+  @Get(':id')
+  async getPostById(
+    @Param('id') id: string,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    try {
+      const postId = parseInt(id, 10);
 
-    // Fetch the post details by ID
-    const post = await this.postsService.getPostById(postId);
+      // Fetch the post details by ID
+      const post = await this.postsService.getPostById(postId);
 
-    if (!post) {
-      return res.status(404).json({ error: 'Post Not Found' });
+      if (!post) {
+        return res.status(404).json({ error: 'Post Not Found' });
+      }
+      // Retrieve user email
+      const token = req.headers.authorization;
+      const authToken = token.slice(7);
+
+      // Verify and decode the JWT
+      const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+
+      // Handle JWT verification errors
+      if (typeof decoded === 'string') {
+        return handleJwtVerificationError(res, decoded);
+      }
+
+      const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
+      // Check if the user viewing the post is the post creator
+
+      if (userId === post.userId) {
+        return res.status(200).json({ post });
+      }
+
+      // Increment the view count for the fetched post for users other than the creator
+      await this.postsService.incrementViews(postId);
+
+      // Return the post details to the user
+      return res.status(200).json({ post });
+    } catch (error) {
+      console.error('Error fetching post:', error.message);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    // Increment the view count for the fetched post
-    await this.postsService.incrementViews(postId);
-
-    // Return the post details to the user
-    return res.status(200).json({ post });
-  } catch (error) {
-    console.error('Error fetching post:', error.message);
-    return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
-
 }
