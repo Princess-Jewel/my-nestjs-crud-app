@@ -1,12 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CreatePostsWithoutId } from 'src/dto/posts.dto';
 import { Posts } from 'src/schema/posts.model';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class PostsService {
   constructor(
     @Inject('POSTS_REPOSITORY')
     private postsRepository: typeof Posts,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
    
   ) {}
 
@@ -33,19 +36,16 @@ export class PostsService {
 
 
   // For Post Views
-  // async incrementViews(postId: number): Promise<void> {
-  //   const post = await this.postsRepository.findByPk(postId);
-  //   if (post) {
-  //     post.views = (post.views || 0) + 1;
-  //     await post.save();
-  //   }
-  // }
-
   async incrementViews(postId: number): Promise<void> {
     const post = await Posts.findByPk(postId);
     if (post) {
       post.views++;
+  
+      // Save the updated view count in the database
       await post.save();
+  
+      // Store the updated view count in the cache
+      await this.cacheManager.set(`views_${postId}`, post.views, 1000 );
     }
   }
 }

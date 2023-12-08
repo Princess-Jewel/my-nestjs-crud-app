@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { DatabaseConnectionModule } from './databaseConnection.module';
 import { PostsController } from 'src/controllers/posts.controller';
 import { PostsService } from 'src/services/posts.service';
@@ -11,7 +12,7 @@ import { postImagesProviders } from 'src/providers/postImages.providers';
 
 
 @Module({
-  imports: [DatabaseConnectionModule],
+  imports: [DatabaseConnectionModule, CacheModule.register()],
   //   // Controllers are responsible for handling incoming HTTP requests and returning responses.
   controllers: [PostsController],
   //   //   Providers (or services) contain the business logic and provide functionality to controllers and other parts of the application.

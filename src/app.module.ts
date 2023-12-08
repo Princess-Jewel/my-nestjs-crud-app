@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CacheModule } from '@nestjs/cache-manager';
+// import { CacheModule } from '@nestjs/cache-manager';
 import { AuthModule } from './modules/auth.module';
 import { UsersModule } from './modules/users.module';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -27,7 +27,7 @@ import { Images } from './schema/postImages.model';
     UsersModule,
     PostsModule,
     CommentsModule,
-    CacheModule.register()
+    // CacheModule.register()
   ],
 })
 export class AppModule {}

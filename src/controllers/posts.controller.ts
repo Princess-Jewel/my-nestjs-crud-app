@@ -30,6 +30,7 @@ import { uploadStream } from 'src/helper/uploadStream';
 import { PostImagesDto } from 'src/dto/postImages.dto';
 import { PostImagesService } from 'src/services/postImages.service';
 
+
 dotenv.config();
 
 @Controller('posts')
@@ -41,6 +42,7 @@ export class PostsController {
     private postsRepository: typeof Posts,
     @Inject('COMMENTS_REPOSITORY')
     private commentsRepository: typeof Comments,
+
   ) {}
 
   // upload image(s) with post
@@ -369,7 +371,7 @@ export class PostsController {
       // Increment the view count for the fetched post for users other than the creator
       await this.postsService.incrementViews(postId);
 
-      // Return the post details to the user
+      // Return the post details
       return res.status(200).json({ post });
     } catch (error) {
       console.error('Error fetching post:', error.message);
