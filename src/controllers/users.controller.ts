@@ -18,7 +18,7 @@ import {
 import { UsersService } from '../services/users.service';
 import { Response, Request } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { CreateUserDto } from 'src/dto/createUser.dto';
+import { CreateUserDto, CreateUserWithoutId } from 'src/dto/createUser.dto';
 // import * as jwt from 'jsonwebtoken';
 import { Users } from 'src/schema/users.model';
 import * as bcrypt from 'bcrypt';
@@ -259,6 +259,8 @@ export class UsersController {
       res.status(500).json({ status: 'error', error: error });
     }
   }
+
+
 }
 
 

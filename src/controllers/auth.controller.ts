@@ -27,10 +27,12 @@ export class AuthController {
       const existingUser = await this.usersService.findOne(createUserDto.email);
 
       if (existingUser) {
-        return res.status(401).json({
-          status: 'Error',
-          message: 'User with the same email already exists.',
-        });
+        return res
+          .status(401)
+          .json({
+            status: 'Error',
+            message: 'User with the same email already exists.',
+          });
       }
 
       const saltOrRounds = 10;
