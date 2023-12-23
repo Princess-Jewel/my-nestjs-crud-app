@@ -47,7 +47,7 @@ export class PostsService {
         await post.save();
   
         // Store the updated view count in the cache
-        await this.cacheManager.set(`views_${postId}`, post.views, 30);
+        await this.cacheManager.set(`views_${postId}`, post.views, 30000);
   
         // Log success if the cache was set
         console.log('Successfully set cache for', post.views);

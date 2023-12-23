@@ -328,26 +328,24 @@ export class PostsController {
   
       // Check if the data exists in the cache
       const cachedData = await this.cacheManager.get(`views_${postId}`);
-  
-      // Fetch the updated post (including incremented views)
-      const updatedPost = await this.postsService.getPostById(postId);
-      
-      // Update the cache with the new views count if available
-      if (updatedPost && updatedPost.views) {
-        await this.cacheManager.set(`views_${postId}`, updatedPost.views, 30);
-      }
-  
       if (cachedData) {
         console.log('Getting data from cache:', cachedData);
-        return res.status(200).json({ views: cachedData, post, cachedData: "cachedData" });
+        return res
+          .status(200)
+          .json({ views: cachedData, post, cachedData: 'cachedData' });
       }
   
-      return res.status(200).json({ views: updatedPost.views, post, updatedData: "updatedData" });
+      // Update the cache with the new views count if available
+      if (post && post.views) {
+        await this.cacheManager.set(`views_${postId}`, post.views, 30000);
+      }
+  
+      return res
+        .status(200)
+        .json({ views: post.views, post, updatedData: 'updatedData' });
     } catch (error) {
       return res.status(500).json({ error: 'Error fetching post' });
     }
   }
   
-
-
 }
