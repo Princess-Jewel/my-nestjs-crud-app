@@ -227,6 +227,7 @@ export class UsersController {
           // Find the user by user email
           const user = await this.usersRepository.findOne({ where: { email } });
 
+          
           // // Check if the user doesn't exist
           if (!user) {
             throw new NotFoundException('User Not Found');

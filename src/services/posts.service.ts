@@ -37,15 +37,24 @@ export class PostsService {
 
   // For Post Views
   async incrementViews(postId: number): Promise<void> {
-    const post = await Posts.findByPk(postId);
-    if (post) {
-      post.views++;
+    try {
+      const post = await Posts.findByPk(postId);
+      
+      if (post) {
+        post.views++;
+        
+        // Save the updated view count in the database
+        await post.save();
+        
+        // Store the updated view count in the cache
+        await this.cacheManager.set(`views_${postId}`, post.views, 1000 );
   
-      // Save the updated view count in the database
-      await post.save();
-  
-      // Store the updated view count in the cache
-      await this.cacheManager.set(`views_${postId}`, post.views, 1000 );
+      }
+    } catch (error) {
+      throw new Error('Error incrementing views');
     }
   }
+  
+  
+  
 }

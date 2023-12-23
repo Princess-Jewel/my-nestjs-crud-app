@@ -29,7 +29,8 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express/multer';
 import { uploadStream } from 'src/helper/uploadStream';
 import { PostImagesDto } from 'src/dto/postImages.dto';
 import { PostImagesService } from 'src/services/postImages.service';
-
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 dotenv.config();
 
@@ -42,7 +43,7 @@ export class PostsController {
     private postsRepository: typeof Posts,
     @Inject('COMMENTS_REPOSITORY')
     private commentsRepository: typeof Comments,
-
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   // upload image(s) with post
@@ -129,7 +130,7 @@ export class PostsController {
 
   // CREATE ONLY POST
   @UseGuards(AuthGuard)
-  @Post('create/posts')
+  @Post('create/post')
   async createPost(
     @Body() createPostsDto: CreatePostsDto,
     @Res() res: Response,
@@ -342,40 +343,49 @@ export class PostsController {
   ) {
     try {
       const postId = parseInt(id, 10);
-
+  
       // Fetch the post details by ID
       const post = await this.postsService.getPostById(postId);
-
+  
       if (!post) {
         return res.status(404).json({ error: 'Post Not Found' });
       }
-      // Retrieve user email
+  
+      // Retrieve user ID from JWT
       const token = req.headers.authorization;
       const authToken = token.slice(7);
-
-      // Verify and decode the JWT
       const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-
-      // Handle JWT verification errors
+  
       if (typeof decoded === 'string') {
         return handleJwtVerificationError(res, decoded);
       }
-
-      const userId = parseInt(decoded.sub, 10); // User ID from JWT. I turned it to an integer to avoid errors
-      // Check if the user viewing the post is the post creator
-
-      if (userId === post.userId) {
-        return res.status(200).json({ post });
+  
+      const userId = parseInt(decoded.sub, 10);
+  
+      // Check if the data exists in the cache
+      const cachedData = await this.cacheManager.get(`views_${postId}`);
+  
+      if (cachedData) {
+        return res.status(200).json({ views: cachedData, post, cachedData: "cacchedData" });
       }
-
-      // Increment the view count for the fetched post for users other than the creator
-      await this.postsService.incrementViews(postId);
-
-      // Return the post details
-      return res.status(200).json({ post });
+  
+      // Fetch the updated post (including incremented views)
+      const updatedPost = await this.postsService.getPostById(postId);
+  
+      if (updatedPost && updatedPost.views) {
+        // Update the cache with the new views count
+        await this.cacheManager.set(`views_${postId}`, updatedPost.views, 1000);
+      }
+  
+      if (userId !== post.userId) {
+        // Increment the view count for users other than the creator
+        await this.postsService.incrementViews(postId);
+      }
+  
+      return res.status(200).json({ views: updatedPost.views, post , updataedData: "updatedData"});
     } catch (error) {
-      console.error('Error fetching post:', error.message);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      return res.status(500).json({ error: 'Error fetching post' });
     }
   }
+  
 }

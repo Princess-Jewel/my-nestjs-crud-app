@@ -8,11 +8,21 @@ import { CommentsService } from 'src/services/comments.service';
 import { commentsProviders } from 'src/providers/comments.providers';
 import { PostImagesService } from 'src/services/postImages.service';
 import { postImagesProviders } from 'src/providers/postImages.providers';
-
-
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
-  imports: [DatabaseConnectionModule, CacheModule.register()],
+  imports: [
+    DatabaseConnectionModule,
+    CacheModule.register(
+    //   {
+    //   useFactory: () => ({
+    //     store: redisStore,
+    //     host: 'localhost',
+    //     port: 6379,
+    //   }),
+    // }
+    ),
+  ],
   //   // Controllers are responsible for handling incoming HTTP requests and returning responses.
   controllers: [PostsController],
   //   //   Providers (or services) contain the business logic and provide functionality to controllers and other parts of the application.
@@ -22,13 +32,7 @@ import { postImagesProviders } from 'src/providers/postImages.providers';
     CommentsService,
     PostImagesService,
     ...commentsProviders,
-    ...postImagesProviders
+    ...postImagesProviders,
   ],
 })
-
-
-
-
 export class PostsModule {}
-
-
