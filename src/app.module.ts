@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-// import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AuthModule } from './modules/auth.module';
 import { UsersModule } from './modules/users.module';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -27,7 +28,12 @@ import { Images } from './schema/postImages.model';
     UsersModule,
     PostsModule,
     CommentsModule,
-    // CacheModule.register()
+    CacheModule.register({
+      isGlobal: true,
+      store: redisStore,
+      host: 'localhost',
+      port: 6379,
+    }),
   ],
 })
 export class AppModule {}

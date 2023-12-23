@@ -39,21 +39,27 @@ export class PostsService {
   async incrementViews(postId: number): Promise<void> {
     try {
       const post = await Posts.findByPk(postId);
-      
+  
       if (post) {
         post.views++;
-        
+  
         // Save the updated view count in the database
         await post.save();
-        
-        // Store the updated view count in the cache
-        await this.cacheManager.set(`views_${postId}`, post.views, 1000 );
   
+        // Store the updated view count in the cache
+        await this.cacheManager.set(`views_${postId}`, post.views, 30);
+  
+        // Log success if the cache was set
+        console.log('Successfully set cache for', post.views);
+      } else {
+        throw new Error('Post not found');
       }
     } catch (error) {
+      console.error('Error incrementing views:', error.message);
       throw new Error('Error incrementing views');
     }
   }
+  
   
   
   
