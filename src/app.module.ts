@@ -16,6 +16,8 @@ import { BullModule } from '@nestjs/bull';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailTesterModule } from './modules/emailTester.module';
 import { MailModule } from './modules/mail.module';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 require('dotenv').config();
 
 @Module({
@@ -58,7 +60,12 @@ require('dotenv').config();
           pass: process.env.USER_PASS,
         },
       },
+      template: {
+        dir: join(__dirname, 'templates'),
+        adapter: new HandlebarsAdapter(),
+      },
     }),
+   
   ],
 })
 export class AppModule {}
