@@ -9,7 +9,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: authorEmail,
       subject: 'New Comment on Your Post',
-      template: 'comment-notification', // Template file (HTML or EJS)
+      template: '/templates/comment-notification',
       context: {
         postTitle,
       },

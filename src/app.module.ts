@@ -15,6 +15,7 @@ import { Images } from './schema/postImages.model';
 import { BullModule } from '@nestjs/bull';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailTesterModule } from './modules/emailTester.module';
+import { MailModule } from './modules/mail.module';
 require('dotenv').config();
 
 @Module({
@@ -31,6 +32,7 @@ require('dotenv').config();
     AuthModule,
     DatabaseConnectionModule,
     EmailTesterModule,
+    MailModule,
     UsersModule,
     PostsModule,
     CommentsModule,

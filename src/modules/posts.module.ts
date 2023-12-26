@@ -7,11 +7,14 @@ import { CommentsService } from 'src/services/comments.service';
 import { commentsProviders } from 'src/providers/comments.providers';
 import { PostImagesService } from 'src/services/postImages.service';
 import { postImagesProviders } from 'src/providers/postImages.providers';
+import { MailModule } from './mail.module';
+import { MailService } from 'src/services/mail.service';
 
 
 @Module({
   imports: [
     DatabaseConnectionModule,
+    // MailModule
    
   ],
   //   // Controllers are responsible for handling incoming HTTP requests and returning responses.
@@ -24,6 +27,7 @@ import { postImagesProviders } from 'src/providers/postImages.providers';
     PostImagesService,
     ...commentsProviders,
     ...postImagesProviders,
+    // MailService
   ],
 })
 export class PostsModule {}
