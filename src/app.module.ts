@@ -18,6 +18,7 @@ import { EmailTesterModule } from './modules/emailTester.module';
 import { MailModule } from './modules/mail.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+
 require('dotenv').config();
 
 @Module({
@@ -65,7 +66,9 @@ require('dotenv').config();
         adapter: new HandlebarsAdapter(),
       },
     }),
-   
+    BullModule.registerQueue({
+      name: 'emailSending',
+    }),
   ],
 })
 export class AppModule {}

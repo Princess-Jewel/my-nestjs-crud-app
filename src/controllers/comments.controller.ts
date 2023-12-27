@@ -21,7 +21,8 @@ import { CommentsService } from 'src/services/comments.service';
 import { Comments } from 'src/schema/comments.model';
 import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 import { PostsService } from 'src/services/posts.service';
-import { MailService } from 'src/services/mail.service';
+import { EmailService } from 'src/services/email.service';
+
 
 dotenv.config();
 
@@ -32,7 +33,8 @@ export class CommentsController {
     @Inject('COMMENTS_REPOSITORY')
     private commentsRepository: typeof Comments,
     private postsService: PostsService,
-    private mailService: MailService,
+    private emailService: EmailService,
+    
   ) {}
 
   @UseGuards(AuthGuard)
@@ -89,7 +91,7 @@ export class CommentsController {
           const postTitle = associatedPost.title;
 
           // Notify the author via email
-          await this.mailService.sendCommentNotification(
+          await this.emailService.sendCommentNotification(
             authorEmail,
             postTitle,
           );

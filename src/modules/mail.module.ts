@@ -1,11 +1,21 @@
 import { Module } from '@nestjs/common';
-import { MailService } from 'src/services/mail.service';
-
+import { EmailService } from 'src/services/email.service';
+import { commentsProviders } from 'src/providers/comments.providers';
+import { EmailProcessor } from 'src/jobs/email.processor';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
-    providers:[
-       MailService 
-    ]
-
+  imports: [
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'emailSending',
+    }),
+  ],
+  providers: [...commentsProviders, EmailService, EmailProcessor],
 })
 export class MailModule {}

@@ -4,18 +4,26 @@ import { CommentsController } from 'src/controllers/comments.controller';
 import { commentsProviders } from 'src/providers/comments.providers';
 import { CommentsService } from 'src/services/comments.service';
 import { PostsModule } from './posts.module';
-import { MailService } from 'src/services/mail.service';
-import { MailModule } from './mail.module';
 import { PostsService } from 'src/services/posts.service';
 import { postsProviders } from 'src/providers/posts.providers';
-
+import { EmailService } from 'src/services/email.service';
+import { BullModule } from '@nestjs/bull';
 
 
 @Module({
-  imports: [DatabaseConnectionModule,
+  imports: [
+    DatabaseConnectionModule,
     PostsModule,
-    //  MailModule
-    ],
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+    name: 'emailSending',
+  }),
+  ],
   //   // Controllers are responsible for handling incoming HTTP requests and returning responses.
   controllers: [CommentsController],
   //   //   Providers (or services) contain the business logic and provide functionality to controllers and other parts of the application.
@@ -24,14 +32,7 @@ import { postsProviders } from 'src/providers/posts.providers';
     ...commentsProviders,
     PostsService,
     ...postsProviders,
-    MailService,
-    
+    EmailService
   ],
 })
-
-
-
-
 export class CommentsModule {}
-
-
