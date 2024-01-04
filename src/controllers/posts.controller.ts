@@ -334,7 +334,7 @@ export class PostsController {
       viewsHistoriesDto.postId = postId;
 
       // Update ViewsHistory table with createdAt, postId and userId 
-     await this.viewsHistoriesService.create(viewsHistoriesDto);
+    await this.viewsHistoriesService.updateViewsHistoriesNotification(viewsHistoriesDto );
 
   
       // // Check if the data exists in the cache

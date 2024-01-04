@@ -19,6 +19,7 @@ import { MailModule } from './modules/mail.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { ViewsHistories, } from './schema/viewsHistories.model';
+import { ViewsHistoriesModule } from './modules/viewsHistories.module';
 
 require('dotenv').config();
 
@@ -40,6 +41,7 @@ require('dotenv').config();
     UsersModule,
     PostsModule,
     CommentsModule,
+    ViewsHistoriesModule,
     CacheModule.register({
       isGlobal: true,
       store: redisStore,
@@ -69,6 +71,9 @@ require('dotenv').config();
     }),
     BullModule.registerQueue({
       name: 'emailSending',
+    }),
+    BullModule.registerQueue({
+      name: 'updateViewsHistories',
     }),
   ],
 })
