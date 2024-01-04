@@ -11,12 +11,12 @@ export class ViewsHistoryService {
 
   async create(viewsHistory: ViewsHistoryDtoWithoutId): Promise<ViewsHistory> {
     try {
-      
+      console.log("princess is here",viewsHistory)
       return await this.viewsHistoryRepository.create(viewsHistory);
     } catch (error) {
       // Handle the error and throw a meaningful exception
-      console.error('Error posting comment:', error);
-      throw new Error('Failed to post comment.');
+      console.error('Error updating views history table:', error);
+      throw new Error('Error updating views history table.');
     }
   }
 }

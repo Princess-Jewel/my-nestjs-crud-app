@@ -9,14 +9,16 @@ export class ViewsHistory extends Model {
   @Column
   id: number;
 
-
   @Column({ allowNull: false }) 
   userId: number;
 
-  @ForeignKey(() => Posts)
-  @Column
-  postId: number;
+  @Column ({allowNull: false})
+  postId: number
 
-  @BelongsTo(() => Posts)
-  post: Posts; // This sets up the association to the Posts model
+  // @ForeignKey(() => Posts)
+  // @Column
+  // postId: number;
+
+  // @BelongsTo(() => Posts)
+  // post: Posts; // This sets up the association to the Posts model
 }
