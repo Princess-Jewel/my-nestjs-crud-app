@@ -18,20 +18,20 @@ import { EmailTesterModule } from './modules/emailTester.module';
 import { MailModule } from './modules/mail.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
-import { Views } from './schema/views.model';
+import { ViewsHistory } from './schema/viewsHistory.model';
 
 require('dotenv').config();
 
 @Module({
   imports: [
     SequelizeModule.forRoot({
-      dialect: "mysql",
-      host: "localhost",
+      dialect: 'mysql',
+      host: 'localhost',
       port: 3306,
-      username: "root",
-      password: "",
-      database: "signups",
-      models: [Users, Posts, Comments, Images, Views],
+      username: 'root',
+      password: '',
+      database: 'signups',
+      models: [Users, Posts, Comments, Images, ViewsHistory],
     }),
     AuthModule,
     DatabaseConnectionModule,

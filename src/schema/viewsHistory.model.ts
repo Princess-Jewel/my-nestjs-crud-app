@@ -3,7 +3,7 @@ import { Posts } from './posts.model';
 
 
 @Table
-export class Views extends Model {
+export class ViewsHistory extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column

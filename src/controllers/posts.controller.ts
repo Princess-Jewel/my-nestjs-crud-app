@@ -325,6 +325,10 @@ export class PostsController {
       if (userId !== post.userId) {
         await this.postsService.incrementViews(postId);
       }
+
+
+
+      
   
       // Check if the data exists in the cache
       const cachedData = await this.cacheManager.get(`views_${postId}`);
