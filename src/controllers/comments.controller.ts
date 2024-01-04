@@ -36,7 +36,7 @@ export class CommentsController {
     private emailService: EmailService,
     
   ) {}
-
+// CREATE A COMMENT
   @UseGuards(AuthGuard)
   @Post('create')
   async createComment(
@@ -113,7 +113,7 @@ export class CommentsController {
     }
   }
 
-  // UPDATE A POST
+  // UPDATE A COMMENT
   @UseGuards(AuthGuard)
   @Delete(':commentId')
   async deleteComment(

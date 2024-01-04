@@ -33,6 +33,7 @@ import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ViewsHistoriesDto } from 'src/dto/viewsHistories.dto';
 import { ViewsHistoriesService } from 'src/services/viewsHistories.service';
+import { ViewsHistories } from 'src/schema/viewsHistories.model';
 
 dotenv.config();
 
@@ -46,7 +47,9 @@ export class PostsController {
     @Inject('COMMENTS_REPOSITORY')
     private commentsRepository: typeof Comments,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private viewsHistoriesService: ViewsHistoriesService
+    private viewsHistoriesService: ViewsHistoriesService,
+    @Inject('VIEWS_HISTORIES_REPOSITORY')
+    private viewsHistoriesRepository: typeof ViewsHistories,
   ) {}
 
   // upload image(s) with post
@@ -131,7 +134,9 @@ export class PostsController {
       // Extract the Bearer token from the Authorization header
       const token = req.headers.authorization;
       // Check if the token exists and starts with 'Bearer '
-      if (token && token.startsWith('Bearer ')) {
+      if (!token || !token.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Invalid or missing token' });
+      }
         // Remove 'Bearer ' to get just the token
         const authToken = token.slice(7);
         // Verify and decode the JWT
@@ -145,7 +150,7 @@ export class PostsController {
         const userId = parseInt(decoded.sub, 10);
         createPostsDto.email = email;
         createPostsDto.userId = userId;
-      }
+      
       const newPost = await this.postsService.create(createPostsDto);
       return res.status(201).json({
         status: 'Success',
@@ -264,6 +269,7 @@ export class PostsController {
       }
     }
   }
+
   // GET ALL POSTS AND COMMENTS
   @UseGuards(AuthGuard)
   @Get('allPostsAndComments')
@@ -295,6 +301,42 @@ export class PostsController {
       throw error;
     }
   }
+
+
+ // GET POST VIEWS HISTORY
+@Get('viewshistory')
+async getPostsViewsHistory(@Req() req: Request, @Res() res: Response): Promise<any> {
+  try {
+    const token = req.headers.authorization;
+    if (!token || !token.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Invalid or missing token' });
+    }
+      const authToken = token.slice(7);
+      const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+      if (typeof decoded === 'string') {
+        return handleJwtVerificationError(res, decoded);
+      }
+     
+      const userId = parseInt(decoded.sub, 10);
+
+      const viewsHistory = await this.viewsHistoriesService.findViewsHistoryByUserId(userId);
+      
+      return res.status(201).json({
+        status: 'Success',
+        // message: 'Post created successfully',
+        post: viewsHistory,
+      });
+    // } else {
+    //   return res.status(401).json({ error: 'Invalid token' }); // Handle cases where there's no or invalid token
+    // }
+  } catch (error) {
+    console.error("Error fetching views history:", error);
+    throw new Error("Error fetching views history");
+  }
+}
+
+
+
   // GET A SINGLE POST
   @UseGuards(AuthGuard)
   @Get(':id')
@@ -306,25 +348,25 @@ export class PostsController {
   ) {
     try {
       const postId = parseInt(id, 10);
-  
+
       // Fetch the post details by ID
       const post = await this.postsService.getPostById(postId);
-  
+
       if (!post) {
         return res.status(404).json({ error: 'Post Not Found' });
       }
-  
+
       // Retrieve user ID from JWT
       const token = req.headers.authorization;
       const authToken = token.slice(7);
       const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-  
+
       if (typeof decoded === 'string') {
         return handleJwtVerificationError(res, decoded);
       }
-  
+
       const userId = parseInt(decoded.sub, 10);
-  
+
       // Increment the view count for users other than the creator
       if (userId !== post.userId) {
         await this.postsService.incrementViews(postId);
@@ -333,10 +375,11 @@ export class PostsController {
       viewsHistoriesDto.userId = userId;
       viewsHistoriesDto.postId = postId;
 
-      // Update ViewsHistory table with createdAt, postId and userId 
-    await this.viewsHistoriesService.updateViewsHistoriesNotification(viewsHistoriesDto );
+      // Update ViewsHistory table with createdAt, postId and userId
+      await this.viewsHistoriesService.updateViewsHistoriesNotification(
+        viewsHistoriesDto,
+      );
 
-  
       // // Check if the data exists in the cache
       const cachedData = await this.cacheManager.get(`views_${postId}`);
       if (cachedData) {
@@ -345,18 +388,20 @@ export class PostsController {
           .status(200)
           .json({ views: cachedData, post, cachedData: 'cachedData' });
       }
-  
+
       // Update the cache with the new views count if available
       if (post && post.views) {
         await this.cacheManager.set(`views_${postId}`, post.views, 30000);
       }
-  
+
       return res
         .status(200)
         .json({ views: post.views, post, updatedData: 'updatedData' });
     } catch (error) {
-      return res.status(500).json({ error: 'Error fetching post' });
+      return res.status(500).json({ error: 'Error fetching post princess' });
     }
   }
-  
+
+
+
 }
