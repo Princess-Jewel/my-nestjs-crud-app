@@ -3,7 +3,7 @@ import { Posts } from './posts.model';
 
 
 @Table
-export class ViewsHistory extends Model {
+export class ViewsHistories extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
@@ -12,13 +12,11 @@ export class ViewsHistory extends Model {
   @Column({ allowNull: false }) 
   userId: number;
 
-  @Column ({allowNull: false})
-  postId: number
 
-  // @ForeignKey(() => Posts)
-  // @Column
-  // postId: number;
+  @ForeignKey(() => Posts)
+  @Column
+  postId: number;
 
-  // @BelongsTo(() => Posts)
-  // post: Posts; // This sets up the association to the Posts model
+  @BelongsTo(() => Posts)
+  post: Posts; // This sets up the association to the Posts model
 }

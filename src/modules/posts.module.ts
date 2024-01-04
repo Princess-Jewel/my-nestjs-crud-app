@@ -7,8 +7,8 @@ import { CommentsService } from 'src/services/comments.service';
 import { commentsProviders } from 'src/providers/comments.providers';
 import { PostImagesService } from 'src/services/postImages.service';
 import { postImagesProviders } from 'src/providers/postImages.providers';
-import { ViewsHistoryService } from 'src/services/viewsHistory.service';
-import { viewsHistoryProviders } from 'src/providers/viewsHistory.providers';
+import { ViewsHistoriesService } from 'src/services/viewsHistories.service';
+import { viewsHistoriesProviders } from 'src/providers/viewsHistories.providers';
 
 
 @Module({
@@ -26,8 +26,8 @@ import { viewsHistoryProviders } from 'src/providers/viewsHistory.providers';
     PostImagesService,
     ...commentsProviders,
     ...postImagesProviders,
-    ViewsHistoryService,
-    ...viewsHistoryProviders
+    ViewsHistoriesService,
+    ...viewsHistoriesProviders
   ],
 })
 export class PostsModule {}

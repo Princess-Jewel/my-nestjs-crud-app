@@ -1,6 +1,6 @@
 import { IsNotEmpty} from 'class-validator';
 
-export class ViewsHistoryDto {
+export class ViewsHistoriesDto {
   
     @IsNotEmpty()
     postId: number;
@@ -11,4 +11,4 @@ export class ViewsHistoryDto {
 
 
 // Omit the 'id' property
-export type ViewsHistoryDtoWithoutId = Omit<ViewsHistoryDto, 'id'>;
+export type ViewsHistoriesDtoWithoutId = Omit<ViewsHistoriesDto, 'id'>;

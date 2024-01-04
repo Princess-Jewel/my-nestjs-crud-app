@@ -31,8 +31,8 @@ import { PostImagesDto } from 'src/dto/postImages.dto';
 import { PostImagesService } from 'src/services/postImages.service';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ViewsHistoryDto } from 'src/dto/viewsHistory.dto';
-import { ViewsHistoryService } from 'src/services/viewsHistory.service';
+import { ViewsHistoriesDto } from 'src/dto/viewsHistories.dto';
+import { ViewsHistoriesService } from 'src/services/viewsHistories.service';
 
 dotenv.config();
 
@@ -46,7 +46,7 @@ export class PostsController {
     @Inject('COMMENTS_REPOSITORY')
     private commentsRepository: typeof Comments,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private viewsHistoryService: ViewsHistoryService
+    private viewsHistoriesService: ViewsHistoriesService
   ) {}
 
   // upload image(s) with post
@@ -302,7 +302,7 @@ export class PostsController {
     @Param('id') id: string,
     @Res() res: Response,
     @Req() req: Request,
-    @Body() viewsHistoryDto: ViewsHistoryDto,
+    @Body() viewsHistoriesDto: ViewsHistoriesDto,
   ) {
     try {
       const postId = parseInt(id, 10);
@@ -330,32 +330,30 @@ export class PostsController {
         await this.postsService.incrementViews(postId);
       }
 
-      viewsHistoryDto.userId = userId;
-      viewsHistoryDto.postId = postId;
+      viewsHistoriesDto.userId = userId;
+      viewsHistoriesDto.postId = postId;
 
-      console.log("viewshistoydto", viewsHistoryDto)
       // Update ViewsHistory table with createdAt, postId and userId 
-      const updateViewsHistoryTable = await this.viewsHistoryService.create(viewsHistoryDto);
+     await this.viewsHistoriesService.create(viewsHistoriesDto);
 
-console.log("updateViewsHistoryTable", updateViewsHistoryTable)
   
       // // Check if the data exists in the cache
-      // const cachedData = await this.cacheManager.get(`views_${postId}`);
-      // if (cachedData) {
-      //   console.log('Getting data from cache:', cachedData);
-      //   return res
-      //     .status(200)
-      //     .json({ views: cachedData, post, cachedData: 'cachedData' });
-      // }
+      const cachedData = await this.cacheManager.get(`views_${postId}`);
+      if (cachedData) {
+        console.log('Getting data from cache:', cachedData);
+        return res
+          .status(200)
+          .json({ views: cachedData, post, cachedData: 'cachedData' });
+      }
   
-      // // Update the cache with the new views count if available
-      // if (post && post.views) {
-      //   await this.cacheManager.set(`views_${postId}`, post.views, 30000);
-      // }
+      // Update the cache with the new views count if available
+      if (post && post.views) {
+        await this.cacheManager.set(`views_${postId}`, post.views, 30000);
+      }
   
-      // return res
-      //   .status(200)
-      //   .json({ views: post.views, post, updatedData: 'updatedData' });
+      return res
+        .status(200)
+        .json({ views: post.views, post, updatedData: 'updatedData' });
     } catch (error) {
       return res.status(500).json({ error: 'Error fetching post' });
     }
