@@ -9,7 +9,6 @@ export class EmailProcessor {
   @Process('send-email') // Handle jobs with the name 'send-email'
   async sendCommentNotification(job: Job<{ authorEmail: string; postTitle: string }>): Promise<void> {
     const { data } = job;
-    console.log('Received job to send email:', data); // Log job data for verification
     const { authorEmail, postTitle } = data; // Extract data from the job
 
     // Send the email using the mailer service

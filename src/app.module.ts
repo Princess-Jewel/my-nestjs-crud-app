@@ -18,6 +18,7 @@ import { EmailTesterModule } from './modules/emailTester.module';
 import { MailModule } from './modules/mail.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { Views } from './schema/views.model';
 
 require('dotenv').config();
 
@@ -30,7 +31,7 @@ require('dotenv').config();
       username: "root",
       password: "",
       database: "signups",
-      models: [Users, Posts, Comments, Images],
+      models: [Users, Posts, Comments, Images, Views],
     }),
     AuthModule,
     DatabaseConnectionModule,
