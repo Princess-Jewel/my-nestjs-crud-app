@@ -20,6 +20,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 import { ViewsHistories, } from './schema/viewsHistories.model';
 import { ViewsHistoriesModule } from './modules/viewsHistories.module';
+import { PaystackModule } from './modules/paystack.module';
 
 require('dotenv').config();
 
@@ -42,6 +43,7 @@ require('dotenv').config();
     PostsModule,
     CommentsModule,
     ViewsHistoriesModule,
+    PaystackModule,
     CacheModule.register({
       isGlobal: true,
       store: redisStore,

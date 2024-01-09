@@ -131,6 +131,7 @@ export class PostsController {
     @Req() req: Request,
   ) {
     try {
+      
       // Extract the Bearer token from the Authorization header
       const token = req.headers.authorization;
       // Check if the token exists and starts with 'Bearer '
