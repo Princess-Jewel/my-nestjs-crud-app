@@ -36,6 +36,7 @@ export class AuthService {
       // Passwords match, return the payload in the jwt
 
       const access_token = await this.jwtService.signAsync(payload);
+      console.log("User", user)
       // I created a new object because i dont want to send the password to the frontend
       const userResponse = {
         id: user.id,
@@ -43,7 +44,8 @@ export class AuthService {
         lname: user.lname,
         email: user.email,
         age: user.age,
-        avatar: user.avatar,
+        // avatar: user.avatar,
+        // wallet: user.wallet,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       };

@@ -251,7 +251,7 @@ export class UsersController {
             lname: updatedAvatar.lname,
             email: updatedAvatar.email,
             age: updatedAvatar.age,
-            avatar: updatedAvatar.avatar,
+            // avatar: updatedAvatar.avatar,
             createdAt: updatedAvatar.createdAt,
             updatedAt: updatedAvatar.updatedAt,
           };
