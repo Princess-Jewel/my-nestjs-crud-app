@@ -4,6 +4,9 @@ import { AuthGuard } from 'src/guard/auth.guard';
 import { Response, Request } from 'express';
 require('dotenv').config();
 
+const MAX_RETRIES = 3; // Maximum number of retries
+const RETRY_INTERVAL = 1 * 60 * 1000; // Retry interval in milliseconds (2 minutes)
+
 const paystackOptions = {
   hostname: 'api.paystack.co',
   port: 443,
@@ -20,9 +23,11 @@ export class PaystackController {
 
   @UseGuards(AuthGuard)
   @Post('initializeTransaction/:email/:amount')
-  async initializeTransaction(@Res() res: Response, @Req() req: Request,): Promise<any> {
+  async initializeTransaction(
+    @Res() res: Response,
+    @Req() req: Request,
+  ): Promise<any> {
     try {
-
       const { email, amount } = req.params;
 
       const params = JSON.stringify({
@@ -33,7 +38,7 @@ export class PaystackController {
       const options = {
         ...paystackOptions,
         path: '/transaction/initialize',
-        method: 'POST'
+        method: 'POST',
       };
 
       const initializeTransactionReq = https.request(options, (response) => {
@@ -63,9 +68,12 @@ export class PaystackController {
 
   @UseGuards(AuthGuard)
   @Get('verifyTransaction/:reference')
-  async verifyTransaction(@Res() res: Response, @Req() req: Request,): Promise<any> {
+  async verifyTransaction(
+    @Res() res: Response,
+    @Req() req: Request,
+    retries = 0,
+  ): Promise<any> {
     try {
-   
       const options = {
         ...paystackOptions,
         path: `/transaction/verify/${req.params.reference}`,
@@ -73,7 +81,7 @@ export class PaystackController {
       };
 
       const data: string = await new Promise((resolve, reject) => {
-        const req = https.request(options, (response) => {
+        const verifyTransactionReq = https.request(options, (response) => {
           let data: string = '';
 
           response.on('data', (chunk) => {
@@ -85,15 +93,45 @@ export class PaystackController {
           });
         });
 
-        req.on('error', (error) => {
+        verifyTransactionReq.on('error', (error) => {
           reject(error);
         });
 
-        req.end();
+        verifyTransactionReq.end();
       });
 
-      res.status(200).json(JSON.parse(data));
-      console.log(JSON.parse(data));
+      const responseData = JSON.parse(data);
+      console.log('responseData', responseData);
+      if (responseData.data.status === 'success') {
+        console.log('TRANSACTION IS A SUCCESSS');
+        // Update user's wallet balance based on the transaction amount
+        // You need to implement your wallet update logic here
+        // Example: userWalletService.updateBalance(userId, amount);
+
+        res.status(200).json({ message: 'Transaction verified successfully' });
+      } else {
+        if (retries < MAX_RETRIES) {
+          console.log(
+            `Retry attempt ${
+              retries + 1
+            }: Transaction verification failed. Retrying in ${
+              RETRY_INTERVAL / 1000
+            } seconds...`,
+          );
+
+          // Retry after a specified interval
+          setTimeout(() => {
+            this.verifyTransaction(res, req, retries + 1);
+          }, RETRY_INTERVAL);
+        } else {
+          console.log(
+            `Max retries reached. Transaction verification failed after ${retries} attempts.`,
+          );
+          res
+            .status(400)
+            .json({ error: 'Transaction verification failed after retries' });
+        }
+      }
     } catch (error) {
       console.error('Error verifying transaction:', error);
       res.status(500).json({ error: 'Error verifying transaction' });

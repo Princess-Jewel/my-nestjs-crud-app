@@ -15,8 +15,8 @@ bootstrap();
 //   "status": true,
 //   "message": "Authorization URL created",
 //   "data": {
-//     "authorization_url": "https://checkout.paystack.com/5izp1et6xl01j4n",
-//     "access_code": "5izp1et6xl01j4n",
-//     "reference": "n1mhf6me95"
+//     "authorization_url": "https://checkout.paystack.com/3xcxfnwm3v13obb",
+//     "access_code": "3xcxfnwm3v13obb",
+//     "reference": "zb5qukka59"
 //   }
 // }

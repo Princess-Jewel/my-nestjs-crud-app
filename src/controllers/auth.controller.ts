@@ -40,7 +40,7 @@ export class AuthController {
       // Add the hashed password to createUserDto
       createUserDto.password = hash;
       const createdUser = await this.authService.create(createUserDto);
-      console.log("createdUser", createdUser)
+      // console.log("createdUser", createdUser)
       // I created a new object because i dont want to send the password to the frontend
       const userResponse = {
         id: createdUser.id,
