@@ -1,4 +1,5 @@
-import { Model, Column, PrimaryKey, AutoIncrement, Table } from 'sequelize-typescript';
+import { Model, Column, PrimaryKey, AutoIncrement, Table, HasOne } from 'sequelize-typescript';
+import { UsersWallets } from './usersWallets.model';
 
 
 @Table
@@ -31,4 +32,8 @@ export class Users extends Model {
 
 
   // I commented them out because they are not supposed to be part of the payload when making a request
+
+  // @HasOne(() => UsersWallets)
+  // usersWallets!: UsersWallets;
+
 }

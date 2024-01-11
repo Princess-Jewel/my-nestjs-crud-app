@@ -23,7 +23,6 @@ import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificat
 import { PostsService } from 'src/services/posts.service';
 import { EmailService } from 'src/services/email.service';
 
-
 dotenv.config();
 
 @Controller('comments')
@@ -34,9 +33,8 @@ export class CommentsController {
     private commentsRepository: typeof Comments,
     private postsService: PostsService,
     private emailService: EmailService,
-    
   ) {}
-// CREATE A COMMENT
+  // CREATE A COMMENT
   @UseGuards(AuthGuard)
   @Post('create')
   async createComment(
@@ -104,7 +102,10 @@ export class CommentsController {
       } else {
         return res
           .status(401)
-          .json({ status: 'Error', message: 'Unauthorized to comment on post' });
+          .json({
+            status: 'Error',
+            message: 'Unauthorized to comment on post',
+          });
       }
     } catch (error) {
       return res
@@ -157,13 +158,11 @@ export class CommentsController {
         await comment.destroy();
 
         // Respond with a success message
-        res
-          .status(200)
-          .json({
-            status: 'success',
-            message: 'Comment deleted successfully',
-            deletedComment: comment,
-          });
+        res.status(200).json({
+          status: 'success',
+          message: 'Comment deleted successfully',
+          deletedComment: comment,
+        });
       } else {
         return res
           .status(401)

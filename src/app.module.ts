@@ -18,9 +18,11 @@ import { EmailTesterModule } from './modules/emailTester.module';
 import { MailModule } from './modules/mail.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
-import { ViewsHistories, } from './schema/viewsHistories.model';
+import { ViewsHistories} from './schema/viewsHistories.model';
 import { ViewsHistoriesModule } from './modules/viewsHistories.module';
 import { PaystackModule } from './modules/paystack.module';
+import { UsersWallets } from './schema/usersWallets.model';
+import { UsersWalletsModule } from './modules/usersWallets.module';
 
 require('dotenv').config();
 
@@ -33,7 +35,7 @@ require('dotenv').config();
       username: 'root',
       password: '',
       database: 'signups',
-      models: [Users, Posts, Comments, Images, ViewsHistories],
+      models: [Users, Posts, Comments, Images, ViewsHistories, UsersWallets],
     }),
     AuthModule,
     DatabaseConnectionModule,
@@ -44,6 +46,7 @@ require('dotenv').config();
     CommentsModule,
     ViewsHistoriesModule,
     PaystackModule,
+    UsersWalletsModule,
     CacheModule.register({
       isGlobal: true,
       store: redisStore,

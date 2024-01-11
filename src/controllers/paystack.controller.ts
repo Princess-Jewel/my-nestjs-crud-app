@@ -1,11 +1,25 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  NotFoundException,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
 import * as https from 'https';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { Response, Request } from 'express';
+import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+import * as jwt from 'jsonwebtoken';
+import { Users } from 'src/schema/users.model';
+import { UsersWalletsService } from 'src/services/usersWallets.service';
 require('dotenv').config();
 
 const MAX_RETRIES = 3; // Maximum number of retries
-const RETRY_INTERVAL = 1 * 60 * 1000; // Retry interval in milliseconds (2 minutes)
+const RETRY_INTERVAL = 2 * 60 * 1000; // Retry interval in milliseconds (2 minutes)
 
 const paystackOptions = {
   hostname: 'api.paystack.co',
@@ -19,7 +33,11 @@ const paystackOptions = {
 
 @Controller('paystack')
 export class PaystackController {
-  constructor() {}
+  constructor(
+    @Inject('USERS_REPOSITORY')
+    private usersRepository: typeof Users,
+    private userWalletService: UsersWalletsService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post('initializeTransaction/:email/:amount')
@@ -49,12 +67,21 @@ export class PaystackController {
         });
 
         response.on('end', () => {
-          res.status(200).json(JSON.parse(data));
+          try {
+            const responseData = JSON.parse(data);
+            res.status(200).json(JSON.parse(data));
+            // I want the redirection to happen on the frontend, I am sending all of the data to the frontend
+            // Redirect the user to the Paystack payment page instead of doing it here.
+            // res.redirect(responseData.data.authorization_url);
+          } catch (parseError) {
+            console.error('Error parsing Paystack response:', parseError);
+            res.status(500).json({ error: 'Error parsing Paystack response' });
+          }
         });
       });
 
       initializeTransactionReq.on('error', (error) => {
-        console.error(error);
+        console.error('Error initializing transaction:', error);
         res.status(500).json({ error: 'Error initializing transaction' });
       });
 
@@ -101,14 +128,41 @@ export class PaystackController {
       });
 
       const responseData = JSON.parse(data);
-      console.log('responseData', responseData);
-      if (responseData.data.status === 'success') {
-        console.log('TRANSACTION IS A SUCCESSS');
-        // Update user's wallet balance based on the transaction amount
-        // You need to implement your wallet update logic here
-        // Example: userWalletService.updateBalance(userId, amount);
 
-        res.status(200).json({ message: 'Transaction verified successfully' });
+      if (responseData.data.status === 'success') {
+        const token = req.headers.authorization;
+        const authToken = token.slice(7);
+
+        try {
+          const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+
+          if (typeof decoded === 'string') {
+            return handleJwtVerificationError(res, decoded);
+          }
+
+          const userId = parseInt(decoded.sub, 10);
+          const user = await this.usersRepository.findOne({
+            where: { id: userId },
+          });
+
+          if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+          }
+
+          // Update user's wallet balance based on the transaction amount
+          const updatedWalletBalance =
+            await this.userWalletService.updateBalance(
+              user.id,
+              responseData.data.amount,
+              'credit',
+            );
+          res.status(200).json({
+            message: 'Wallet balance updated successfully',
+            userBalance: updatedWalletBalance,
+          });
+        } catch (jwtError) {
+          return handleJwtVerificationError(res, jwtError);
+        }
       } else {
         if (retries < MAX_RETRIES) {
           console.log(

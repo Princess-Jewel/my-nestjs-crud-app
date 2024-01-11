@@ -9,8 +9,7 @@ export class PostsService {
   constructor(
     @Inject('POSTS_REPOSITORY')
     private postsRepository: typeof Posts,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
-   
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(post: CreatePostsWithoutId): Promise<Posts> {
@@ -23,7 +22,6 @@ export class PostsService {
     }
   }
 
-
   // async getPostById(id: number): Promise<Posts | null> {
   //   return await this.postsRepository.findByPk(id);
   // }
@@ -32,23 +30,21 @@ export class PostsService {
     const post = await Posts.findByPk(postId);
     return post || null;
   }
-  
-
 
   // For Post Views
   async incrementViews(postId: number): Promise<void> {
     try {
       const post = await Posts.findByPk(postId);
-  
+
       if (post) {
         post.views++;
-  
+
         // Save the updated view count in the database
         await post.save();
-  
+
         // Store the updated view count in the cache
         await this.cacheManager.set(`views_${postId}`, post.views, 30000);
-  
+
         // Log success if the cache was set
         console.log('Successfully set cache for', post.views);
       } else {
@@ -59,8 +55,4 @@ export class PostsService {
       throw new Error('Error incrementing views');
     }
   }
-  
-  
-  
-  
 }
