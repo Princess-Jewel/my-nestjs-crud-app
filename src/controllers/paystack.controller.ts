@@ -5,8 +5,8 @@ import {
   Req,
   Res,
   UseGuards,
-  NotFoundException,
-  UnauthorizedException,
+  // NotFoundException,
+  // UnauthorizedException,
   Inject,
 } from '@nestjs/common';
 import * as https from 'https';
@@ -150,16 +150,16 @@ export class PaystackController {
           }
 
           // Update user's wallet balance based on the transaction amount
-          const updatedWalletBalance =
-            await this.userWalletService.updateBalance(
-              user.id,
-              responseData.data.amount,
-              'credit',
-            );
-          res.status(200).json({
-            message: 'Wallet balance updated successfully',
-            userBalance: updatedWalletBalance,
-          });
+          // const updatedWalletBalance =
+          //   await this.userWalletService.updateBalance(
+          //     user.id,
+          //     responseData.data.amount,
+          //     'credit',
+          //   );
+          // res.status(200).json({
+          //   message: 'Wallet balance updated successfully',
+          //   userBalance: updatedWalletBalance,
+          // });
         } catch (jwtError) {
           return handleJwtVerificationError(res, jwtError);
         }

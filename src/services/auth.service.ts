@@ -5,6 +5,7 @@ import { CreateUserWithoutId } from '../dto/createUser.dto';
 import { UsersService } from './users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
+import { UsersWallets } from 'src/schema/usersWallets.model';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +37,18 @@ export class AuthService {
       // Passwords match, return the payload in the jwt
 
       const access_token = await this.jwtService.signAsync(payload);
-      // console.log("User", user)
+
+      // Create a wallet for the user after signing in
+      let userWallet = await UsersWallets.findByPk(user.id);
+
+      if (!userWallet) {
+        // If the user's wallet doesn't exist, create it with the initial balance
+        userWallet = await UsersWallets.create({
+          userId: user.id,
+          walletBalance: 0.00,
+          transactionType: "default"
+        });
+      } 
       // I created a new object because i dont want to send the password to the frontend
       const userResponse = {
         id: user.id,
