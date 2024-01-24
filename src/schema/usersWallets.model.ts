@@ -30,4 +30,6 @@ export class UsersWallets extends Model<UsersWallets> {
 
   @BelongsTo(() => Users)
   user: Users; // This sets up the association to the Users model
+  totalCredits: number;
+  totalDebits: number;
 }

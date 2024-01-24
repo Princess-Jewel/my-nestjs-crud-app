@@ -26,3 +26,4 @@ export class UpdateUsersWalletDto {
 
 // Omit the 'id' property
 export type UpdateUsersWalletDtoWithoutId = Omit<UpdateUsersWalletDto, 'id'>;
+

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail,} from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsInt,} from 'class-validator';
 
 export class CreatePostsDto {
   @IsString()
@@ -16,8 +16,23 @@ export class CreatePostsDto {
   @IsNotEmpty()
   userId: number;
 
+  // @IsString(allowNull: true,)
+  // avatar: string;
+  
+
   @IsString()
-  avatar: string;
+  @IsNotEmpty()
+  reference: string;
+
+  @IsString()
+  @IsNotEmpty()
+  currency: string;
+
+  @IsInt()
+  amount: number;
+
+  @IsString()
+  transactionType: string;
 }
 
 

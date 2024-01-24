@@ -22,9 +22,8 @@ export class Posts extends Model {
   @Column
   userId: number;
 
-  // @Column
-  // avatar: string;
-    // I commented them out because they are not supposed to be part of the payload when making a request
+  @Column({ allowNull: true })
+  avatar: string;
 
   @HasMany(() => Comments)
   comments: Comments[];

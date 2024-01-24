@@ -46,8 +46,6 @@ export class AuthService {
         include: [Users], // This will include the associated Users model data
       });
 
-      // console.log(user.email, "princess ooooo")
-      console.log(userWallet, 'princess lohin');
 
       if (!userWallet) {
         // If the user's wallet doesn't exist, create it with the initial balance

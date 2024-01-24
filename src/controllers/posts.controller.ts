@@ -34,6 +34,13 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ViewsHistoriesDto } from 'src/dto/viewsHistories.dto';
 import { ViewsHistoriesService } from 'src/services/viewsHistories.service';
 import { ViewsHistories } from 'src/schema/viewsHistories.model';
+import { UsersWallets } from 'src/schema/usersWallets.model';
+import { Sequelize } from 'sequelize-typescript';
+import {
+  paymentForPost,
+  paymentForPostCurrency,
+} from 'src/constants/payment.constant';
+import { Users } from 'src/schema/users.model';
 
 dotenv.config();
 
@@ -127,31 +134,81 @@ export class PostsController {
   @Post('create/post')
   async createPost(
     @Body() createPostsDto: CreatePostsDto,
+
     @Res() res: Response,
     @Req() req: Request,
   ) {
     try {
-      
       // Extract the Bearer token from the Authorization header
       const token = req.headers.authorization;
       // Check if the token exists and starts with 'Bearer '
       if (!token || !token.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Invalid or missing token' });
       }
-        // Remove 'Bearer ' to get just the token
-        const authToken = token.slice(7);
-        // Verify and decode the JWT
-        const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-        // console.log("decoded", decoded)
-        // Handle JWT verification errors
-        if (typeof decoded === 'string') {
-          return handleJwtVerificationError(res, decoded);
-        }
-        const email = decoded.email;
-        const userId = parseInt(decoded.sub, 10);
-        createPostsDto.email = email;
-        createPostsDto.userId = userId;
-      
+      // Remove 'Bearer ' to get just the token
+      const authToken = token.slice(7);
+      // Verify and decode the JWT
+      const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+      // console.log("decoded", decoded)
+      // Handle JWT verification errors
+      if (typeof decoded === 'string') {
+        return handleJwtVerificationError(res, decoded);
+      }
+      const email = decoded.email;
+      const userId = parseInt(decoded.sub, 10);
+      createPostsDto.email = email;
+      createPostsDto.userId = userId;
+
+      const walletBalance = await UsersWallets.findAll({
+        attributes: [
+          [
+            Sequelize.fn(
+              'SUM',
+              Sequelize.literal(
+                'CASE WHEN transactionType = "credit" THEN amount ELSE 0 END',
+              ),
+            ),
+            'totalCredits',
+          ],
+          [
+            Sequelize.fn(
+              'SUM',
+              Sequelize.literal(
+                'CASE WHEN transactionType = "debit" THEN amount ELSE 0 END',
+              ),
+            ),
+            'totalDebits',
+          ],
+        ],
+        where: { userId },
+        raw: true,
+      });
+
+      const balance =
+        (walletBalance[0].totalCredits || 0) -
+        (walletBalance[0].totalDebits || 0);
+
+      if (balance > paymentForPost) {
+        // If the user's wallet doesn't exist, create it with the initial balance
+        await UsersWallets.create({
+          userId,
+          email,
+          reference: 'payment for post',
+          currency: paymentForPostCurrency,
+          amount: paymentForPost,
+          transactionType: 'debit',
+        });
+
+        // Deduct the paymentForPost from the user' wallet balance
+        const newWalletBalance = balance - paymentForPost;
+      } else {
+        return res.status(500).json({
+          status: 'Error',
+          message: 'Insuffient balance, please top up wallet',
+        });
+      }
+
+      // Proceed to create Post if payment is successful
       const newPost = await this.postsService.create(createPostsDto);
       return res.status(201).json({
         status: 'Success',
@@ -162,6 +219,7 @@ export class PostsController {
       return handlePostCreationError(res, error);
     }
   }
+
   // DELETE A POST
   @UseGuards(AuthGuard)
   @Delete(':postId')
@@ -303,40 +361,41 @@ export class PostsController {
     }
   }
 
-
- // GET POST VIEWS HISTORY
-@Get('viewshistory')
-async getPostsViewsHistory(@Req() req: Request, @Res() res: Response): Promise<any> {
-  try {
-    const token = req.headers.authorization;
-    if (!token || !token.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Invalid or missing token' });
-    }
+  // GET POST VIEWS HISTORY
+  @Get('viewshistory')
+  async getPostsViewsHistory(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<any> {
+    try {
+      const token = req.headers.authorization;
+      if (!token || !token.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Invalid or missing token' });
+      }
       const authToken = token.slice(7);
       const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
       if (typeof decoded === 'string') {
         return handleJwtVerificationError(res, decoded);
       }
-     
+
       const userId = parseInt(decoded.sub, 10);
 
-      const viewsHistory = await this.viewsHistoriesService.findViewsHistoryByUserId(userId);
-      
+      const viewsHistory =
+        await this.viewsHistoriesService.findViewsHistoryByUserId(userId);
+
       return res.status(201).json({
         status: 'Success',
         // message: 'Post created successfully',
         post: viewsHistory,
       });
-    // } else {
-    //   return res.status(401).json({ error: 'Invalid token' }); // Handle cases where there's no or invalid token
-    // }
-  } catch (error) {
-    console.error("Error fetching views history:", error);
-    throw new Error("Error fetching views history");
+      // } else {
+      //   return res.status(401).json({ error: 'Invalid token' }); // Handle cases where there's no or invalid token
+      // }
+    } catch (error) {
+      console.error('Error fetching views history:', error);
+      throw new Error('Error fetching views history');
+    }
   }
-}
-
-
 
   // GET A SINGLE POST
   @UseGuards(AuthGuard)
@@ -402,7 +461,4 @@ async getPostsViewsHistory(@Req() req: Request, @Res() res: Response): Promise<a
       return res.status(500).json({ error: 'Error fetching post princess' });
     }
   }
-
-
-
 }
