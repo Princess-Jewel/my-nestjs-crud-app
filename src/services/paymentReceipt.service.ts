@@ -10,7 +10,7 @@ export class PaymentReceiptService {
 
   async paymentReceiptNotification(
     receipient: string,
-    amount: number,
+    amount: string,
     reference: string,
     date: string,
     bank: number,

@@ -1,30 +1,25 @@
 import {
   Body,
   Controller,
-  // Inject,
   Post,
   Req,
   Res,
-  // UseGuards,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { Response, Request } from 'express';
-// import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
-// import { Users } from 'src/schema/users.model';
-// import { UsersWalletsService } from 'src/services/usersWallets.service';
-// import * as jwt from 'jsonwebtoken';
-// import { AuthGuard } from 'src/guard/auth.guard';
 import { UsersWallets } from 'src/schema/usersWallets.model';
 import { UpdateUsersWalletDtoWithoutId } from 'src/dto/updateUsersWallet.dto';
 import { PaymentReceiptService } from 'src/services/paymentReceipt.service';
+import { formatDateToDayMonthYear } from 'src/utils/formatDate.utils';
+import { addCommasToNumber } from 'src/utils/addCommasToNumber.utils';
 require('dotenv').config();
 
 @Controller('webhook')
 export class PaystackWebhookController {
   constructor(
-    private paymentReceiptService: PaymentReceiptService, // @Inject('USERS_REPOSITORY')
-  ) // private usersRepository: typeof Users,
-  // private userWalletService: UsersWalletsService,
+    private paymentReceiptService: PaymentReceiptService, 
+ 
+  ) 
   {}
 
   @Post()
@@ -42,14 +37,6 @@ export class PaystackWebhookController {
     if (hash === req.headers['x-paystack-signature']) {
       const event = req.body;
 
-      // console.log('THIS IS THE EVENT', event);
-      // console.log('THIS IS THE EVENT DATA', event.data);
-      // console.log("THIS IS THE CUSTOMER' customer", event.data.customer.id);
-      // console.log("THIS IS THE CUSTOMER' EMAIL", event.data.customer.email);
-      // console.log('THIS IS THE REFERENCE', event.data.reference);
-      // console.log('THIS IS THE CURRENCY', event.data.currency);
-      // console.log('THIS IS THE AMOUNT', event.data.amount);
-
       try {
         // Find the user's wallet using the reference
         const reference = await UsersWallets.findOne({
@@ -65,19 +52,12 @@ export class PaystackWebhookController {
         // divide amount by 100 to convert from kobo back to naira before updating database
         const convertedFromKoboToNaira = event.data.amount / 100;
 
-        // Assuming that you want to update the user's wallet balance
-        // based on the transaction amount
-        // const amount = parseFloat(event.data.amount);
-        // const updatedAmount = await this.userWalletService.updateBalance(
-        //   event.data.customer.email,
-        //   event.data.reference,
-        //   event.data.currency,
-        //   parseFloat(event.data.amount),
-        //   'credit',
-        // );
+        // add comma(s) to the convertedFromKoboToNaira
+        const addedCommaToAmount = addCommasToNumber(convertedFromKoboToNaira);
 
-        // Add the reference to updateUsersWalletDto
-        // updateUsersWalletDtoWithoutId.reference = event.data.reference;
+        // convert created_at to day,month and year format
+        const formattedDate = formatDateToDayMonthYear(event.data.created_at);
+
         updateUsersWalletDtoWithoutId.email = event.data.customer.email;
         updateUsersWalletDtoWithoutId.reference = event.data.reference;
         updateUsersWalletDtoWithoutId.currency = event.data.currency;
@@ -90,9 +70,9 @@ export class PaystackWebhookController {
         // Notify the author via email
         await this.paymentReceiptService.paymentReceiptNotification(
           event.data.customer.email,
-          convertedFromKoboToNaira,
+          addedCommaToAmount,
           event.data.reference,
-          event.data.created_at,
+          formattedDate,
           event.data.authorization.bank,
           event.data.authorization.card_type,
           event.data.authorization.last4,

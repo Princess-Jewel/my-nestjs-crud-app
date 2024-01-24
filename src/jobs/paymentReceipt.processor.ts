@@ -10,7 +10,7 @@ export class PaymentReceiptProcessor {
   async paymentReceiptNotification(
     job: Job<{
       receipient: string;
-      amount: number;
+      amount: string;
       reference: string;
       date: string;
       bank: number;
