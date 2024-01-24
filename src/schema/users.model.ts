@@ -1,6 +1,5 @@
-import { Model, Column, PrimaryKey, AutoIncrement, Table, HasOne } from 'sequelize-typescript';
+import { Model, Column, PrimaryKey, AutoIncrement, Table, HasMany } from 'sequelize-typescript';
 import { UsersWallets } from './usersWallets.model';
-
 
 @Table
 export class Users extends Model {
@@ -24,16 +23,7 @@ export class Users extends Model {
   @Column({ allowNull: false }) 
   password: string;
 
-  // @Column({ allowNull: false }) 
-  // avatar: string;
-
-  // @Column({ allowNull: false }) 
-  // wallet: number;
-
-
-  // I commented them out because they are not supposed to be part of the payload when making a request
-
-  // @HasOne(() => UsersWallets)
-  // usersWallets!: UsersWallets;
-
+  // Define the one-to-many relationship with UsersWallets
+  @HasMany(() => UsersWallets)
+  usersWallets: UsersWallets[];
 }

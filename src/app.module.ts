@@ -23,6 +23,8 @@ import { ViewsHistoriesModule } from './modules/viewsHistories.module';
 import { PaystackModule } from './modules/paystack.module';
 import { UsersWallets } from './schema/usersWallets.model';
 import { UsersWalletsModule } from './modules/usersWallets.module';
+import { PaystackWebhookModule } from './modules/paystackWebhook.module';
+import { PaymentReceiptModule } from './modules/paymentReceipt.module';
 
 require('dotenv').config();
 
@@ -47,6 +49,8 @@ require('dotenv').config();
     ViewsHistoriesModule,
     PaystackModule,
     UsersWalletsModule,
+    PaystackWebhookModule,
+    PaymentReceiptModule,
     CacheModule.register({
       isGlobal: true,
       store: redisStore,
@@ -79,6 +83,9 @@ require('dotenv').config();
     }),
     BullModule.registerQueue({
       name: 'updateViewsHistories',
+    }),
+    BullModule.registerQueue({
+      name: 'paymentReceipt',
     }),
   ],
 })

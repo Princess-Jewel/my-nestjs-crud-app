@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<head>
+ 
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+      color: #333;
+    }
+
+    h1, h2, p {
+      text-align: center;
+    }
+
+    h1 {
+      color: #4CAF50;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    strong {
+      font-weight: bold;
+    }
+
+    .capitalize {
+      text-transform: capitalize;
+    }
+  </style>
+</head>
+<body>
+  <div>
+ <h1 id="amountHeader">Princess Jewel received your payment of <strong>{{currency}} {{amount}}</strong></h1>
+    <h2>Transaction details</h2>
+    <p>Reference: <strong>{{reference}}</strong></p>
+     <p>Transaction Type: <strong class="capitalize">{{transactionType}}</strong></p>
+      <p>Date: <strong data-date="{{date}}">{{date}}</strong></p>
+    <p>Bank: <strong>{{bank}}</strong></p>
+    <p>Card: <strong class="capitalize">{{cardType}} ending with {{lastFourDigits}}</strong></p>
+  </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Function to format the date as day, month, and year
+    function formatDate(dateString) {
+      const options = {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      };
+
+      const date = new Date(dateString);
+      const day = date.getDate();
+      const suffix = day === 1 ? 'st' : day === 2 ? 'nd' : day === 3 ? 'rd' : 'th';
+
+      return day + suffix + ' ' + new Intl.DateTimeFormat('en-US', options).format(date);
+    }
+
+    // Format the date
+    var dateElement = document.querySelector('strong[data-date]');
+    if (dateElement) {
+      var originalDate = dateElement.getAttribute('data-date');
+      var formattedDate = formatDate(originalDate);
+      dateElement.innerText = formattedDate;
+    }
+
+    // Format the amount
+    var amountElement = document.getElementById('amountHeader');
+    var amountValue = amountElement.querySelector('strong').innerText;
+    var formattedAmount = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD', // Change this to the desired currency code
+    }).format(parseInt(amountValue.replace(/[^0-9.-]+/g,"")));
+    amountElement.querySelector('strong').innerText = formattedAmount;
+  });
+</script>
+
+</body>
+</html>

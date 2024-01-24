@@ -18,8 +18,7 @@ export class AuthService {
 
   async create(user: CreateUserWithoutId): Promise<Users> {
     try {
-      return  await this.usersRepository.create(user);
-     
+      return await this.usersRepository.create(user);
     } catch (error) {
       // Handle the error and throw a meaningful exception
       console.error('Error creating user:', error);
@@ -39,16 +38,28 @@ export class AuthService {
       const access_token = await this.jwtService.signAsync(payload);
 
       // Create a wallet for the user after signing in
-      let userWallet = await UsersWallets.findByPk(user.id);
+      // let userWallet = await UsersWallets.findByPk(user.id);
+      let userWallet = await UsersWallets.findOne({
+        where: {
+          userId: user.id,
+        },
+        include: [Users], // This will include the associated Users model data
+      });
+
+      // console.log(user.email, "princess ooooo")
+      console.log(userWallet, 'princess lohin');
 
       if (!userWallet) {
         // If the user's wallet doesn't exist, create it with the initial balance
         userWallet = await UsersWallets.create({
           userId: user.id,
-          walletBalance: 0.00,
-          transactionType: "default"
+          email: user.email,
+          reference: '',
+          currency: '',
+          amount: 0.0,
+          transactionType: 'credit',
         });
-      } 
+      }
       // I created a new object because i dont want to send the password to the frontend
       const userResponse = {
         id: user.id,
