@@ -15,9 +15,10 @@ import { Response, Request } from 'express';
 // import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
 import * as jwt from 'jsonwebtoken';
 import { Users } from 'src/schema/users.model';
-import { UsersWalletsService } from 'src/services/usersWallets.service';
-import { UsersWallets } from 'src/schema/usersWallets.model';
+import { TransactionsService } from 'src/services/transactions.service';
+// import { Transactions } from 'src/schema/transactions.model';
 import { handleJwtVerificationError } from 'src/errorHandlers/handleJwtVerificationError';
+import { Transactions } from 'src/schema/transactions.model';
 require('dotenv').config();
 
 // const MAX_RETRIES = 3; // Maximum number of retries
@@ -37,8 +38,8 @@ const paystackOptions = {
 export class PaystackController {
   constructor(
     @Inject('USERS_WALLETS_REPOSITORY')
-    private usersWalletsProviders: typeof UsersWallets,
-    private userWalletService: UsersWalletsService,
+    private transactionsProviders: typeof Transactions,
+    private transactionsService: TransactionsService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -93,7 +94,7 @@ export class PaystackController {
 
                 // const user = await this.usersWalletsProviders.findByPk(userId);
 
-                let user = await UsersWallets.findOne({
+                let user = await Transactions.findOne({
                   where: {
                     userId,
                   },
@@ -105,7 +106,7 @@ export class PaystackController {
                 }
 
                 // Update the user' wallet table with thetransaction reference
-                await UsersWallets.create({
+                await Transactions.create({
                   userId,
                   email: userEmail,
                   reference: responseData?.data.reference,

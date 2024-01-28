@@ -1,5 +1,6 @@
 import { Model, Column, PrimaryKey, AutoIncrement, Table, HasMany } from 'sequelize-typescript';
-import { UsersWallets } from './usersWallets.model';
+import { Transactions } from './transactions.model';
+
 
 @Table
 export class Users extends Model {
@@ -24,6 +25,6 @@ export class Users extends Model {
   password: string;
 
   // Define the one-to-many relationship with UsersWallets
-  @HasMany(() => UsersWallets)
-  usersWallets: UsersWallets[];
+  @HasMany(() => Transactions)
+  transactions: Transactions[];
 }

@@ -2,7 +2,7 @@ import { Model, Table, Column, DataType, PrimaryKey, AutoIncrement, ForeignKey, 
 import { Users } from './users.model';
 
 @Table
-export class UsersWallets extends Model<UsersWallets> {
+export class Transactions extends Model<Transactions> {
   @PrimaryKey
   @AutoIncrement
   @Column

@@ -7,11 +7,12 @@ import {
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { Response, Request } from 'express';
-import { UsersWallets } from 'src/schema/usersWallets.model';
+// import { Transactions } from 'src/schema/transactions.model';
 import { UpdateUsersWalletDtoWithoutId } from 'src/dto/updateUsersWallet.dto';
 import { PaymentReceiptService } from 'src/services/paymentReceipt.service';
 import { formatDateToDayMonthYear } from 'src/utils/formatDate.utils';
 import { addCommasToNumber } from 'src/utils/addCommasToNumber.utils';
+import { Transactions } from 'src/schema/transactions.model';
 require('dotenv').config();
 
 @Controller('webhook')
@@ -39,7 +40,7 @@ export class PaystackWebhookController {
 
       try {
         // Find the user's wallet using the reference
-        const reference = await UsersWallets.findOne({
+        const reference = await Transactions.findOne({
           where: {
             reference: event.data.reference,
           },

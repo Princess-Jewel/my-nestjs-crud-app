@@ -34,13 +34,22 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ViewsHistoriesDto } from 'src/dto/viewsHistories.dto';
 import { ViewsHistoriesService } from 'src/services/viewsHistories.service';
 import { ViewsHistories } from 'src/schema/viewsHistories.model';
-import { UsersWallets } from 'src/schema/usersWallets.model';
+// import { Transactions } from 'src/schema/transactions.model';
 import { Sequelize } from 'sequelize-typescript';
 import {
   paymentForPost,
   paymentForPostCurrency,
 } from 'src/constants/payment.constant';
-import { Users } from 'src/schema/users.model';
+import { generateRandomString } from 'src/utils/generateRandomString.utils';
+import { Transactions } from 'src/schema/transactions.model';
+// import("nanoid").then((nanoid_1) => {
+//   const generateReference = nanoid_1;
+//   console.log(generateReference)
+// }).catch((error) => {
+//   console.error("Error importing nanoid:", error);
+// });
+
+// import { Users } from 'src/schema/users.model';
 
 dotenv.config();
 
@@ -149,7 +158,7 @@ export class PostsController {
       const authToken = token.slice(7);
       // Verify and decode the JWT
       const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-      // console.log("decoded", decoded)
+
       // Handle JWT verification errors
       if (typeof decoded === 'string') {
         return handleJwtVerificationError(res, decoded);
@@ -159,7 +168,7 @@ export class PostsController {
       createPostsDto.email = email;
       createPostsDto.userId = userId;
 
-      const walletBalance = await UsersWallets.findAll({
+      const walletBalance = await Transactions.findAll({
         attributes: [
           [
             Sequelize.fn(
@@ -188,12 +197,14 @@ export class PostsController {
         (walletBalance[0].totalCredits || 0) -
         (walletBalance[0].totalDebits || 0);
 
+      const randomReference = generateRandomString(10);
+
       if (balance > paymentForPost) {
-        // If the user's wallet doesn't exist, create it with the initial balance
-        await UsersWallets.create({
+      
+        await Transactions.create({
           userId,
           email,
-          reference: 'payment for post',
+          reference: randomReference,
           currency: paymentForPostCurrency,
           amount: paymentForPost,
           transactionType: 'debit',

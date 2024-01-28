@@ -21,10 +21,11 @@ import { join } from 'path';
 import { ViewsHistories} from './schema/viewsHistories.model';
 import { ViewsHistoriesModule } from './modules/viewsHistories.module';
 import { PaystackModule } from './modules/paystack.module';
-import { UsersWallets } from './schema/usersWallets.model';
-import { UsersWalletsModule } from './modules/usersWallets.module';
+// import { Transactions } from './schema/transactions.model';
+import { TransactionsModule } from './modules/transactions.module';
 import { PaystackWebhookModule } from './modules/paystackWebhook.module';
 import { PaymentReceiptModule } from './modules/paymentReceipt.module';
+import { Transactions } from './schema/transactions.model';
 
 require('dotenv').config();
 
@@ -37,7 +38,7 @@ require('dotenv').config();
       username: 'root',
       password: '',
       database: 'signups',
-      models: [Users, Posts, Comments, Images, ViewsHistories, UsersWallets],
+      models: [Users, Posts, Comments, Images, ViewsHistories, Transactions],
     }),
     AuthModule,
     DatabaseConnectionModule,
@@ -48,7 +49,7 @@ require('dotenv').config();
     CommentsModule,
     ViewsHistoriesModule,
     PaystackModule,
-    UsersWalletsModule,
+    TransactionsModule,
     PaystackWebhookModule,
     PaymentReceiptModule,
     CacheModule.register({

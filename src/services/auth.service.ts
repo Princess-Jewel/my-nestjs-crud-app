@@ -5,7 +5,8 @@ import { CreateUserWithoutId } from '../dto/createUser.dto';
 import { UsersService } from './users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-import { UsersWallets } from 'src/schema/usersWallets.model';
+import { Transactions } from 'src/schema/transactions.model';
+
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
 
       // Create a wallet for the user after signing in
       // let userWallet = await UsersWallets.findByPk(user.id);
-      let userWallet = await UsersWallets.findOne({
+      let userWallet = await Transactions.findOne({
         where: {
           userId: user.id,
         },
@@ -49,7 +50,7 @@ export class AuthService {
 
       if (!userWallet) {
         // If the user's wallet doesn't exist, create it with the initial balance
-        userWallet = await UsersWallets.create({
+        userWallet = await Transactions.create({
           userId: user.id,
           email: user.email,
           reference: '',

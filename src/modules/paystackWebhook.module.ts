@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { PaystackWebhookController } from 'src/controllers/paystackWebhook.controller';
 import { usersProviders } from 'src/providers/users.providers';
 import { PaymentReceiptService } from 'src/services/paymentReceipt.service';
-import { UsersWalletsService } from 'src/services/usersWallets.service';
+import { TransactionsService } from 'src/services/transactions.service';
 
 
 
@@ -23,7 +23,7 @@ import { UsersWalletsService } from 'src/services/usersWallets.service';
   controllers: [PaystackWebhookController],
   providers: [
     ...usersProviders,
-    UsersWalletsService,
+    TransactionsService,
     PaymentReceiptService
   ],
 })

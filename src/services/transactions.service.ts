@@ -2,15 +2,15 @@
 
 import { Injectable } from '@nestjs/common';
 import { Users } from 'src/schema/users.model';
-import { UsersWallets } from 'src/schema/usersWallets.model';
+import { Transactions } from 'src/schema/transactions.model';
 
 
 @Injectable()
-export class UsersWalletsService {
+export class TransactionsService {
   constructor(){}
   // Retrieve the current balance for a user
   // async getUserBalance(userId: number): Promise<number> {
-  //   const userWallet = await UsersWallets.findByPk(userId);
+  //   const userWallet = await Transactions.findByPk(userId);
   //   console.log("userWallet", userWallet)
 
   //   console.log("userWallet amount", userWallet.amount)
@@ -22,7 +22,7 @@ export class UsersWalletsService {
 
   // Update the user's wallet balance
   // async updateBalance(email: string, reference: string, currency: string, amount: number, transactionType: string): Promise<void> {
-  //   let userWallet = await UsersWallets.findOne({
+  //   let userWallet = await Transactions.findOne({
   //     where: {
   //       email
   //     },

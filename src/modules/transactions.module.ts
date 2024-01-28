@@ -17,4 +17,4 @@ import { PaystackModule } from './paystack.module';
     ...usersProviders,
   ],
 })
-export class UsersWalletsModule {}
+export class TransactionsModule {}
